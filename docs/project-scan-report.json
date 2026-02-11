@@ -1,0 +1,34 @@
+{
+  "workflow_version": "1.2.0",
+  "timestamps": {
+    "started": "2026-02-10T22:00:00.000Z",
+    "last_updated": "2026-02-10T22:05:00.000Z"
+  },
+  "mode": "initial_scan",
+  "scan_level": "quick",
+  "project_root": "/Applications/MAMP/htdocs/claude-projet/Madouds/SCIManager",
+  "output_folder": "/Applications/MAMP/htdocs/claude-projet/Madouds/SCIManager/docs",
+  "completed_steps": [
+    {"step": "step_1", "status": "completed", "timestamp": "2026-02-10T22:01:00.000Z", "summary": "Classified as monolith with 1 part - web type (Laravel fullstack)"},
+    {"step": "step_2", "status": "completed", "timestamp": "2026-02-10T22:02:00.000Z", "summary": "Found 2 existing docs: README.md, DOCUMENTATION.md"},
+    {"step": "step_3", "status": "completed", "timestamp": "2026-02-10T22:03:00.000Z", "summary": "Tech stack: Laravel 12 on PHP 8.2+"},
+    {"step": "step_4", "status": "completed", "timestamp": "2026-02-10T22:04:00.000Z", "summary": "Conditional analysis complete: 30 migrations, 20 models, 20+ controllers, 8 services"},
+    {"step": "step_10", "status": "completed", "timestamp": "2026-02-10T22:05:00.000Z", "summary": "project-context.md generated"}
+  ],
+  "current_step": "completed",
+  "project_types": [
+    {"part_id": "main", "project_type_id": "web", "display_name": "Web Application (Laravel Fullstack)"}
+  ],
+  "findings": {
+    "project_classification": "Monolith, 1 part, Laravel 12 fullstack web app",
+    "technology_stack": "Laravel 12, PHP 8.2+, MySQL, Blade + Tailwind CSS v3, Alpine.js, Vite",
+    "models_count": 20,
+    "controllers_count": 22,
+    "migrations_count": 30,
+    "services_count": 8,
+    "blade_views_count": 87,
+    "policies_count": 10,
+    "exports_count": 9
+  },
+  "outputs_generated": ["project-scan-report.json", "project-context.md"]
+}

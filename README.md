@@ -1,201 +1,167 @@
-# SCIManager - Gestion Immobiliere Multi-SCI
+# SCIManager - MDA Patrimoine
 
-Plateforme web de gestion immobiliere multi-SCI.
-Stack : Laravel 12, MySQL, Blade + Tailwind CSS, Alpine.js.
+Plateforme web de gestion immobiliere et de patrimoine multi-SCI, developpee pour **Madoud's Art Patrimoine (MDA)**.
+
+**Stack** : Laravel 12 &bull; PHP 8.2+ &bull; MySQL &bull; Blade &bull; Tailwind CSS 3 &bull; Alpine.js &bull; PWA
+
+---
 
 ## Fonctionnalites
 
-- Gestion multi-SCI avec cloisonnement des donnees
-- RBAC : Super Admin, Gestionnaire, Lecture seule
-- Gestion des biens immobiliers (CRUD, statuts)
-- Gestion des locataires (identite, documents, garants)
-- Gestion des baux (creation, activation, resiliation)
-- Generation automatique des echeances mensuelles
-- Suivi des paiements (complet, partiel, impaye)
-- Generation PDF : quittances, recus, avis, attestations, releves, recaps
-- Relances pour impayes (manuelles et automatiques)
-- Dashboard avec KPIs et reporting
-- Exports CSV/Excel
-- Journal d'activite (audit log)
+### Gestion locative
+- **Multi-SCI** : cloisonnement des donnees par SCI, bascule rapide entre entites
+- **Biens immobiliers** : CRUD complet, statuts, photos multiples, galerie
+- **Locataires** : identite, documents, garants, historique
+- **Baux** : creation, activation, resiliation, archivage
+- **Echeances mensuelles** : generation automatique et manuelle, suivi par mois
+- **Paiements** : complet, partiel, impaye, remboursement de caution
+- **Relances** : manuelles et automatiques (SMS via Twilio)
+
+### Point financier courant
+- **Prestations de services** : suivi des interventions (electricite, plomberie, menuiserie, etc.)
+- **Achats de materiel** : suivi des achats fournisseurs
+- **Charges fixes** : CIE, SODECI, honoraires avec filtres par type
+- **Budget mensuel (Caisse)** : definition et suivi du solde
+- **Attestations de reception de fonds** : generation avec signature numerique
+
+### Personnel & Prestataires
+- **Annuaire prestataires** : fiche prestataire, contrats, suivi
+- **Personnel & Paie** : gestion du personnel, fiches de paie mensuelles
+
+### Documents & Exports
+- **Generation PDF** : quittances, recus, avis d'echeance, attestations, releves, recaps mensuels, fiches locataire
+- **Exports CSV/Excel** : locataires, biens, paiements, impayes, baux, echeances, prestataires, personnel, SCIs
+
+### Reporting & Analytique
+- **Dashboard** : KPIs temps reel (total attendu, encaisse, impaye, taux de recouvrement, occupation)
+- **Analytique** : graphiques de tendances, repartition par SCI, evolution mensuelle
+- **Recherche globale** : recherche instantanee multi-entites
+
+### Administration
+- **RBAC** : 3 roles (Super Admin, Gestionnaire, Lecture seule)
+- **Gestion des utilisateurs** : CRUD, assignation aux SCIs
+- **Journal d'activite** : audit log de toutes les actions
+- **Parametres** : configuration globale de la plateforme
+
+### PWA & Responsive
+- **Progressive Web App** : installable sur mobile/tablette, mode offline basique
+- **Responsive** : interface optimisee pour desktop, tablette et mobile
+- **Navigation mobile** : barre de navigation en bas + menu lateral overlay
+
+---
 
 ## Prerequis
 
-- PHP 8.3+
-- Composer
-- MySQL/MariaDB
+- PHP 8.2+
+- Composer 2.x
+- MySQL 8.0+ / MariaDB 10.6+
 - Node.js 18+ / npm
+
+---
 
 ## Installation
 
 ```bash
-# Installer les dependances PHP
+# Cloner le depot
+git clone <url-du-repo> scimanager
+cd scimanager
+
+# Dependances PHP
 composer install
 
-# Installer les dependances JS et compiler
+# Dependances JS et compilation
 npm install && npm run build
 
-# Copier et configurer l'environnement
+# Configuration
 cp .env.example .env
 php artisan key:generate
+
+# Lien de stockage public
+php artisan storage:link
 ```
 
-## Configuration base de donnees
+## Configuration
 
-Modifier `.env` :
+Copier `.env.example` vers `.env` et renseigner les variables d'environnement :
 
 ```env
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
+DB_HOST=
 DB_PORT=3306
-DB_DATABASE=scimanager
-DB_USERNAME=root
-DB_PASSWORD=root
+DB_DATABASE=
+DB_USERNAME=
+DB_PASSWORD=
 ```
 
-Creer la base MySQL :
+Les variables Twilio (optionnelles, pour les relances SMS) sont a renseigner dans le `.env`.
 
-```sql
-CREATE DATABASE scimanager CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-## Migration et seeding
+## Migration
 
 ```bash
 php artisan migrate
 php artisan db:seed
 ```
 
-### Comptes de test (apres seeding)
-
-| Email                       | Mot de passe | Role          |
-|-----------------------------|-------------|---------------|
-| admin@scimanager.com        | password    | Super Admin   |
-| gestionnaire@scimanager.com | password    | Gestionnaire  |
-| lecteur@scimanager.com      | password    | Lecture seule |
+---
 
 ## Lancement
 
 ```bash
-# Serveur de dev
+# Serveur de developpement
 php artisan serve
 
-# Compiler les assets en mode dev (autre terminal)
+# Compilation des assets (mode dev)
 npm run dev
 
-# Queue worker (autre terminal)
+# Queue worker
 php artisan queue:work
 
-# Scheduler local (autre terminal)
+# Scheduler local
 php artisan schedule:work
 ```
 
-Acceder a l'application : http://localhost:8000
+---
 
-## Architecture
+## Roles et permissions
 
-```
-app/
-  Http/
-    Controllers/     # Controleurs REST (logique mince)
-    Middleware/       # CheckRole, SetActiveSci
-    Requests/         # Form Requests (validation)
-  Models/            # Eloquent models (relations, scopes, casts)
-  Policies/          # Authorization policies (RBAC)
-  Services/          # Logique metier
-    LeaseService.php              # Creation/resiliation baux
-    MonthlyGenerationService.php  # Generation echeances
-    PaymentService.php            # Paiements partiels/complets
-    DocumentService.php           # Generation PDF
-    ReminderService.php           # Relances
-    ReportService.php             # Reporting/dashboard
-    AuditService.php              # Journal d'activite
-  Jobs/              # Jobs asynchrones
-  Exports/           # Classes d'export Excel/CSV
-database/
-  migrations/        # Schema BDD
-  factories/         # Factories pour tests
-  seeders/           # Donnees de test
-resources/views/
-  layouts/           # Layout principal (sidebar)
-  components/        # Composants Blade reutilisables
-  dashboard/         # Dashboard
-  scis/              # CRUD SCIs
-  properties/        # CRUD Biens
-  tenants/           # CRUD Locataires
-  leases/            # CRUD Baux
-  monthlies/         # Echeances mensuelles
-  payments/          # Paiements
-  documents/         # Documents generes
-  reminders/         # Relances
-  audit-logs/        # Journal d'activite
-  pdf/               # Templates PDF (dompdf)
-```
+| Action                        | Super Admin | Gestionnaire | Lecture seule |
+|-------------------------------|:-----------:|:------------:|:-------------:|
+| Voir toutes les SCIs          |     Oui     |  Assignees   |  Assignees    |
+| Creer/modifier SCI            |     Oui     |     Non      |     Non       |
+| Gerer utilisateurs/parametres |     Oui     |     Non      |     Non       |
+| CRUD Biens/Locataires/Baux    |     Oui     | SCI assignees|     Non       |
+| Enregistrer paiements         |     Oui     | SCI assignees|     Non       |
+| Point financier courant       |     Oui     | SCI assignees|     Non       |
+| Generer documents/attestations|     Oui     | SCI assignees|     Non       |
+| Personnel & Prestataires      |     Oui     | SCI assignees|     Non       |
+| Consulter / Exporter          |     Oui     |     Oui      |     Oui       |
 
-## Flux metiers
+---
 
-### Creation d'un bail
-1. Selectionner SCI -> Bien (disponible) -> Locataire
-2. `LeaseService::createLease()` :
-   - Verifie qu'aucun bail actif n'existe sur le bien
-   - Cree le bail
-   - Passe le bien en statut "occupe"
-   - Genere les echeances mensuelles
-   - Log audit
-
-### Generation des echeances
-- Automatique : Job mensuel `GenerateMonthliesJob`
-- Manuelle : bouton "Generer echeances" dans l'interface
-- `MonthlyGenerationService::generateForLease()` cree un enregistrement par mois
-
-### Enregistrement d'un paiement
-1. Selectionner une echeance impayee
-2. `PaymentService::recordPayment()` :
-   - Cree l'enregistrement paiement
-   - Met a jour `paid_amount` et `remaining_amount`
-   - Statut : paye (reste=0), partiel (reste>0 et paye>0)
-   - Log audit
-
-### Generation de documents PDF
-- `DocumentService` genere via Blade + dompdf
-- Stockage : `storage/app/documents/{sci_id}/{year}/{month}/`
-- Enregistrement en base (table `documents`)
-
-## Scheduler / Jobs
-
-| Job                           | Frequence        | Description                              |
-|-------------------------------|------------------|------------------------------------------|
-| `GenerateMonthliesJob`        | 1er du mois 01h  | Genere les echeances + penalites         |
-| `SendRemindersJob`            | Quotidien 08h    | Genere et envoie les relances            |
-| `GenerateMonthlySciReportJob` | 1er du mois 06h  | Recap mensuel par SCI                    |
-| Mise a jour statuts           | Quotidien 00h30  | impayes -> en_retard si date depassee    |
-
-Cron systeme :
+## Scheduler (production)
 
 ```cron
 * * * * * cd /path/to/scimanager && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-## Tests
+---
 
-```bash
-php artisan test
-```
+## Dependances principales
 
-Tests Feature :
-- `LeaseServiceTest` : creation bail, occupation bien, resiliation
-- `MonthlyGenerationServiceTest` : generation echeances, doublons, penalites
-- `PaymentServiceTest` : paiement complet, partiel, cumul
-- `DocumentServiceTest` : generation PDF quittance, rapport, avis
+| Package                  | Usage                          |
+|--------------------------|--------------------------------|
+| `laravel/framework` 12   | Framework PHP                  |
+| `laravel/breeze`         | Authentification               |
+| `barryvdh/laravel-dompdf`| Generation PDF                 |
+| `maatwebsite/excel`      | Exports Excel/CSV              |
+| `twilio/sdk`             | Envoi SMS (relances)           |
+| Tailwind CSS 3           | Styles CSS utilitaires         |
+| Alpine.js                | Interactivite cote client      |
+| ApexCharts               | Graphiques et analytique       |
+| Simple-DataTables        | Tri des tableaux cote client   |
 
-## Roles et permissions
+---
 
-| Action                     | Super Admin | Gestionnaire | Lecture seule |
-|----------------------------|:-----------:|:------------:|:-------------:|
-| Voir toutes les SCIs       | Oui         | Assignees    | Assignees     |
-| Creer/modifier SCI         | Oui         | Non          | Non           |
-| CRUD Biens/Locataires/Baux | Oui         | SCI assignees| Non           |
-| Enregistrer paiements      | Oui         | SCI assignees| Non           |
-| Generer documents          | Oui         | SCI assignees| Non           |
-| Consulter / Exporter       | Oui         | Oui          | Oui           |
-| Journal d'activite         | Oui         | Oui          | Oui           |
-# mdapatrimoine
+## Licence
+
+Projet prive - MDA Patrimoine.

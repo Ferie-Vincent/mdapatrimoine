@@ -1,0 +1,28 @@
+{
+    "name": "SCIManager - MDA Patrimoine",
+    "short_name": "SCIManager",
+    "description": "Gestion immobilière et de patrimoine",
+    "start_url": "/dashboard",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1E3A8A",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/assets/img/pwa-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/assets/img/pwa-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/assets/img/pwa-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
