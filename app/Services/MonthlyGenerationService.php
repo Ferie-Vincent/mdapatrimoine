@@ -54,8 +54,7 @@ class MonthlyGenerationService
 
             if (!$exists) {
                 $rentDue = (float) $lease->rent_amount;
-                $chargesDue = (float) ($lease->charges_amount ?? 0);
-                $totalDue = $rentDue + $chargesDue;
+                $totalDue = $rentDue;
 
                 // Calculate due_date: use the due_day, capped at max days in month
                 $maxDay = $current->daysInMonth;
@@ -67,7 +66,7 @@ class MonthlyGenerationService
                     'sci_id'           => $lease->sci_id,
                     'month'            => $monthKey,
                     'rent_due'         => $rentDue,
-                    'charges_due'      => $chargesDue,
+                    'charges_due'      => 0,
                     'penalty_due'      => 0,
                     'total_due'        => $totalDue,
                     'paid_amount'      => 0,

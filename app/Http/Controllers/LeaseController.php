@@ -185,8 +185,6 @@ class LeaseController extends Controller
         // If rent changed, update unpaid monthlies (charges/frais agence not included in monthly)
         $newRent = (float) $lease->rent_amount;
 
-        $newCharges = (float) ($lease->charges_amount ?? 0);
-
         if ($oldRent !== $newRent) {
             // Update fully unpaid monthlies (no payment yet)
             $lease->leaseMonthlies()
@@ -194,21 +192,21 @@ class LeaseController extends Controller
                 ->where('paid_amount', 0)
                 ->update([
                     'rent_due'         => $newRent,
-                    'charges_due'      => $newCharges,
-                    'total_due'        => $newRent + $newCharges,
-                    'remaining_amount' => $newRent + $newCharges,
+                    'charges_due'      => 0,
+                    'total_due'        => $newRent,
+                    'remaining_amount' => $newRent,
                 ]);
 
             // Update partially paid monthlies (recalculate remaining)
             $lease->leaseMonthlies()
                 ->where('status', 'partiel')
                 ->where('paid_amount', '>', 0)
-                ->each(function ($monthly) use ($newRent, $newCharges) {
-                    $newTotal = $newRent + $newCharges + (float) $monthly->penalty_due;
+                ->each(function ($monthly) use ($newRent) {
+                    $newTotal = $newRent + (float) $monthly->penalty_due;
                     $remaining = max(0, $newTotal - (float) $monthly->paid_amount);
                     $monthly->update([
                         'rent_due'         => $newRent,
-                        'charges_due'      => $newCharges,
+                        'charges_due'      => 0,
                         'total_due'        => $newTotal,
                         'remaining_amount' => $remaining,
                         'status'           => $remaining <= 0 ? 'paye' : 'partiel',
