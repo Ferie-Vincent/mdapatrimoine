@@ -93,7 +93,7 @@
             <td class="value">{{ $property->apartment_type_label ?? ucfirst($property->type ?? '') }}</td>
         </tr>
         <tr>
-            <td class="label">Numéro Dossier</td>
+            <td class="label">N° Appartement</td>
             <td class="value">{{ $lease->dossier_number ?? '-' }}</td>
         </tr>
         <tr>

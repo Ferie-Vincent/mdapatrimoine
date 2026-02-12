@@ -43,7 +43,7 @@
                     <tr>
                         <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">NOM</th>
                         <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">PRENOM</th>
-                        <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">N°DOSSIER</th>
+                        <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">N° APPARTEMENT</th>
                         <th class="px-6 py-3.5 text-right text-sm font-medium text-gray-400">LOYER MENSUEL</th>
                         <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">DATE DE PAIEMENT</th>
                         <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">MODE DE PAIEMENT</th>
@@ -63,7 +63,7 @@
                         <tr class="hover:bg-gray-50/50 transition">
                             <td class="px-6 py-5 whitespace-nowrap text-sm font-medium text-gray-900">{{ $tenant?->last_name ?? '-' }}</td>
                             <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $tenant?->first_name ?? '-' }}</td>
-                            <td class="px-6 py-5 whitespace-nowrap text-sm text-brand-600 font-medium">{{ $monthly->lease?->dossier_number ?? '-' }}</td>
+                            <td class="px-6 py-5 whitespace-nowrap text-sm text-brand-600 font-medium">{{ $monthly->lease?->property?->numero_porte ?? $monthly->lease?->dossier_number ?? '-' }}</td>
                             <td class="px-6 py-5 whitespace-nowrap text-sm text-right text-gray-600">{{ number_format((float)$monthly->rent_due, 0, ',', ' ') }}</td>
                             <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $lastPayment?->paid_at?->format('d/m/Y') ?? '-' }}</td>
                             <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $lastPayment?->method ? ucfirst(str_replace('_', ' ', $lastPayment->method)) : '-' }}</td>

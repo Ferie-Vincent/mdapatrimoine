@@ -17,7 +17,7 @@
                 <label for="search" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Recherche</label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span>
-                    <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Nom, prénom, n° dossier, référence bien..."
+                    <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Nom, prénom, n° appartement, référence bien..."
                            class="block w-full pl-9 pr-3 py-2 rounded-xl border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:bg-white focus:border-brand-400 focus:ring-brand-400 transition">
                 </div>
             </div>
@@ -73,7 +73,7 @@
                         </div>
                         <h5 class="text-base font-semibold text-gray-900 text-center">{{ $lease->tenant->last_name ?? '-' }} {{ $lease->tenant->first_name ?? '' }}</h5>
                         <a href="{{ route('dossier-card.show', $lease) }}" class="text-sm font-medium text-brand-600 hover:text-brand-700 transition">
-                            Dossier {{ $lease->dossier_number ?? '-' }}
+                            Appt {{ $lease->property->numero_porte ?? $lease->dossier_number ?? '-' }}
                         </a>
                         <div class="flex items-center gap-3 mt-2">
                             <span class="flex items-center gap-1 text-xs text-gray-400">
@@ -237,6 +237,6 @@
             {{ $leases->links() }}
         </div>
     @else
-        <x-empty-state message="Aucun dossier locataire trouvé." />
+        <x-empty-state message="Aucun locataire trouvé." />
     @endif
 @endsection

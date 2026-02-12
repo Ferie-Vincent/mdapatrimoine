@@ -21,7 +21,7 @@
         <div class="bg-white rounded-lg shadow-lg border-2 border-brand-500 overflow-hidden">
             {{-- Header --}}
             <div class="bg-brand-600 text-white px-6 py-4 text-center">
-                <h2 class="text-xl font-bold tracking-wide">DOSSIER {{ $lease->dossier_number ?? $lease->id }}</h2>
+                <h2 class="text-xl font-bold tracking-wide">APPT {{ $lease->property->numero_porte ?? $lease->dossier_number ?? $lease->id }}</h2>
                 <p class="text-brand-200 text-sm mt-1">{{ $lease->sci->name ?? '' }}</p>
             </div>
 

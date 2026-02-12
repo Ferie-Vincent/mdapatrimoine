@@ -56,7 +56,7 @@
                     <thead class="">
                         <tr>
                             <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Reference</th>
-                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">N° Porte</th>
+                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">N° Appartement</th>
                             <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Adresse</th>
                             <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Ville</th>
                             <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">SCI</th>

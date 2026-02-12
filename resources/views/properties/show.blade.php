@@ -90,7 +90,7 @@
                 @endif
                 @if($property->numero_porte)
                 <div class="bg-slate-50 rounded-xl p-3 text-center">
-                    <p class="text-xs text-gray-400">N° Porte</p>
+                    <p class="text-xs text-gray-400">N° Appartement</p>
                     <p class="text-sm font-bold text-gray-900 mt-0.5">{{ $property->numero_porte }}</p>
                 </div>
                 @endif

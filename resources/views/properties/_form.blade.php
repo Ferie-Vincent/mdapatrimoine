@@ -85,7 +85,7 @@
                 <template x-if="errors.niveau"><p class="mt-1 text-sm text-red-600" x-text="errors.niveau[0]"></p></template>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Numero de porte</label>
+                <label class="block text-sm font-medium text-gray-700">N° Appartement</label>
                 <input type="text" name="numero_porte" value="{{ $p->numero_porte ?? '' }}" placeholder="Ex: A12, 203..." class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                 <template x-if="errors.numero_porte"><p class="mt-1 text-sm text-red-600" x-text="errors.numero_porte[0]"></p></template>
             </div>

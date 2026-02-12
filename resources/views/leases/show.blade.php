@@ -712,7 +712,7 @@
             <div x-show="currentStep === 4" data-step="4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">N° dossier locataire</label>
+                        <label class="block text-sm font-medium text-gray-700">N° Appartement</label>
                         <input type="text" name="dossier_number" value="{{ $lease->dossier_number }}" class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                     </div>
                     <div>

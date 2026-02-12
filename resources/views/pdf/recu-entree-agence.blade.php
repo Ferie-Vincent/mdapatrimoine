@@ -151,10 +151,9 @@
 
     {{-- En-tete locataire --}}
     <div class="info-block">
-        <p><span class="info-label">N° DOSSIER :</span> {{ $lease->dossier_number ?? '-' }}</p>
         <p><span class="info-label">LOCATAIRE :</span> {{ $tenant->full_name ?? '-' }}</p>
         <p><span class="info-label">REFERENCE :</span> {{ $property->reference ?? '-' }}</p>
-        <p><span class="info-label">N° D'APPARTEMENT :</span> {{ $property->numero_porte ?? '-' }}</p>
+        <p><span class="info-label">N° APPARTEMENT :</span> {{ $property->numero_porte ?? $lease->dossier_number ?? '-' }}</p>
         <p><span class="info-label">ADRESSE :</span> {{ $property->address ?? '-' }}</p>
         <p><span class="info-label">DATE D'ENTREE :</span> {{ $lease->start_date ? \Carbon\Carbon::parse($lease->start_date)->format('d/m/Y') : '-' }}</p>
     </div>
