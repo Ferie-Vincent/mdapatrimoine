@@ -64,7 +64,7 @@
                             <td class="px-6 py-5 whitespace-nowrap text-sm font-medium text-gray-900">{{ $tenant?->last_name ?? '-' }}</td>
                             <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $tenant?->first_name ?? '-' }}</td>
                             <td class="px-6 py-5 whitespace-nowrap text-sm text-brand-600 font-medium">{{ $monthly->lease?->dossier_number ?? '-' }}</td>
-                            <td class="px-6 py-5 whitespace-nowrap text-sm text-right text-gray-600">{{ number_format((float)$monthly->total_due, 0, ',', ' ') }}</td>
+                            <td class="px-6 py-5 whitespace-nowrap text-sm text-right text-gray-600">{{ number_format((float)$monthly->rent_due, 0, ',', ' ') }}</td>
                             <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $lastPayment?->paid_at?->format('d/m/Y') ?? '-' }}</td>
                             <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $lastPayment?->method ? ucfirst(str_replace('_', ' ', $lastPayment->method)) : '-' }}</td>
                             <td class="px-6 py-5 whitespace-nowrap text-sm text-right {{ $hasArrears ? 'text-red-600 font-semibold' : 'text-green-600' }}">
@@ -154,6 +154,8 @@
                                 <option value="virement">Virement</option>
                                 <option value="cheque">Cheque</option>
                                 <option value="mobile_money">Mobile Money</option>
+                                <option value="versement_especes">Versement especes sur compte</option>
+                                <option value="depot_bancaire">Depot bancaire</option>
                                 <option value="autre">Autre</option>
                             </select>
                             <template x-if="errors.method"><p class="mt-1 text-sm text-red-600" x-text="errors.method[0]"></p></template>
