@@ -114,7 +114,7 @@ class StaffController extends Controller
             'year'            => ['required', 'integer', 'min:2020'],
             'amount'          => ['required', 'numeric', 'min:0'],
             'paid_at'         => ['required', 'date'],
-            'payment_method'  => ['required', 'in:especes,virement,cheque,mobile_money'],
+            'payment_method'  => ['required', 'in:especes,virement,cheque,mobile_money,versement_especes,depot_bancaire'],
             'reference'       => ['nullable', 'string', 'max:255'],
             'note'            => ['nullable', 'string'],
             'receipt'         => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],

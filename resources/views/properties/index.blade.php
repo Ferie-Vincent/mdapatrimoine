@@ -56,6 +56,7 @@
                     <thead class="">
                         <tr>
                             <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Reference</th>
+                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">N° Porte</th>
                             <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Adresse</th>
                             <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Ville</th>
                             <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">SCI</th>
@@ -77,6 +78,7 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $property->numero_porte ?? '-' }}</td>
                                 <td class="px-6 py-5 text-sm text-gray-600 max-w-xs truncate">{{ $property->address }}</td>
                                 <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $property->city ?? '-' }}</td>
                                 <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $property->sci->name ?? '-' }}</td>

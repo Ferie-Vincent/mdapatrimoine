@@ -23,7 +23,7 @@ class StorePaymentRequest extends FormRequest
             'lease_monthly_id' => ['required', 'exists:lease_monthlies,id'],
             'amount'           => ['required', 'numeric', 'min:0.01'],
             'paid_at'          => ['required', 'date'],
-            'method'           => ['required', 'in:virement,especes,cheque,mobile_money,autre'],
+            'method'           => ['required', 'in:virement,especes,cheque,mobile_money,versement_especes,depot_bancaire,autre'],
             'reference'        => ['nullable', 'string'],
             'note'             => ['nullable', 'string'],
             'receipt'          => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],

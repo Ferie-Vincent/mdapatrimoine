@@ -247,7 +247,7 @@
                     <div>
                         <p class="text-xs text-gray-400">Mode de paiement</p>
                         @php
-                            $methodLabels = ['virement' => 'Virement', 'especes' => 'Espèces', 'cheque' => 'Chèque', 'mobile_money' => 'Mobile Money', 'autre' => 'Autre'];
+                            $methodLabels = ['virement' => 'Virement', 'especes' => 'Espèces', 'cheque' => 'Chèque', 'mobile_money' => 'Mobile Money', 'versement_especes' => 'Versement espèces sur compte', 'depot_bancaire' => 'Dépôt bancaire', 'autre' => 'Autre'];
                         @endphp
                         <p class="text-sm font-semibold text-gray-900">{{ $methodLabels[$lease->payment_method] ?? ucfirst($lease->payment_method ?? '-') }}</p>
                     </div>
@@ -480,6 +480,8 @@
                                                 @case('virement') Virement @break
                                                 @case('cheque') Cheque @break
                                                 @case('mobile_money') Mobile Money @break
+                                                @case('versement_especes') Versement especes sur compte @break
+                                                @case('depot_bancaire') Depot bancaire @break
                                                 @default - @break
                                             @endswitch
                                         </td>
@@ -538,6 +540,8 @@
                             <option value="virement" {{ old('method') === 'virement' ? 'selected' : '' }}>Virement</option>
                             <option value="cheque" {{ old('method') === 'cheque' ? 'selected' : '' }}>Cheque</option>
                             <option value="mobile_money" {{ old('method') === 'mobile_money' ? 'selected' : '' }}>Mobile Money</option>
+                            <option value="versement_especes" {{ old('method') === 'versement_especes' ? 'selected' : '' }}>Versement especes sur compte</option>
+                            <option value="depot_bancaire" {{ old('method') === 'depot_bancaire' ? 'selected' : '' }}>Depot bancaire</option>
                         </select>
                     </div>
 
@@ -666,6 +670,8 @@
                             <option value="virement" {{ $lease->payment_method === 'virement' ? 'selected' : '' }}>Virement</option>
                             <option value="cheque" {{ $lease->payment_method === 'cheque' ? 'selected' : '' }}>Cheque</option>
                             <option value="mobile_money" {{ $lease->payment_method === 'mobile_money' ? 'selected' : '' }}>Mobile Money</option>
+                            <option value="versement_especes" {{ $lease->payment_method === 'versement_especes' ? 'selected' : '' }}>Versement especes sur compte</option>
+                            <option value="depot_bancaire" {{ $lease->payment_method === 'depot_bancaire' ? 'selected' : '' }}>Depot bancaire</option>
                         </select>
                     </div>
                     <div>
@@ -804,6 +810,8 @@
                                     <option value="virement">Virement</option>
                                     <option value="cheque">Cheque</option>
                                     <option value="mobile_money">Mobile Money</option>
+                                    <option value="versement_especes">Versement especes sur compte</option>
+                                    <option value="depot_bancaire">Depot bancaire</option>
                                 </select>
                                 <template x-if="errors.method"><p class="mt-1 text-sm text-red-600" x-text="errors.method[0]"></p></template>
                             </div>

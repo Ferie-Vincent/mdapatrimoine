@@ -236,6 +236,8 @@
                             <option value="virement">Virement</option>
                             <option value="cheque">Cheque</option>
                             <option value="mobile_money">Mobile Money</option>
+                            <option value="versement_especes">Versement especes sur compte</option>
+                            <option value="depot_bancaire">Depot bancaire</option>
                         </select>
                     </div>
                     <div>
@@ -365,6 +367,8 @@
                                 <option value="virement" {{ $lease->payment_method === 'virement' ? 'selected' : '' }}>Virement</option>
                                 <option value="cheque" {{ $lease->payment_method === 'cheque' ? 'selected' : '' }}>Cheque</option>
                                 <option value="mobile_money" {{ $lease->payment_method === 'mobile_money' ? 'selected' : '' }}>Mobile Money</option>
+                                <option value="versement_especes" {{ $lease->payment_method === 'versement_especes' ? 'selected' : '' }}>Versement especes sur compte</option>
+                                <option value="depot_bancaire" {{ $lease->payment_method === 'depot_bancaire' ? 'selected' : '' }}>Depot bancaire</option>
                             </select>
                         </div>
                         <div>

@@ -77,7 +77,7 @@ class FinancialCurrentController extends Controller
             'service_date' => ['nullable', 'date'],
             'amount'       => ['nullable', 'numeric', 'min:0'],
             'status'         => ['nullable', 'in:En cours,Terminé,Ajourné'],
-            'payment_method' => ['nullable', 'in:especes,virement,cheque,mobile_money'],
+            'payment_method' => ['nullable', 'in:especes,virement,cheque,mobile_money,versement_especes,depot_bancaire'],
             'receipt'        => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ], [
             'sci_id.required'       => 'Veuillez sélectionner une SCI.',
@@ -123,7 +123,7 @@ class FinancialCurrentController extends Controller
             'supplier'      => ['required', 'string', 'max:255'],
             'purchase_date' => ['nullable', 'date'],
             'amount'         => ['nullable', 'numeric', 'min:0'],
-            'payment_method' => ['nullable', 'in:especes,virement,cheque,mobile_money'],
+            'payment_method' => ['nullable', 'in:especes,virement,cheque,mobile_money,versement_especes,depot_bancaire'],
             'receipt'        => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ], [
             'sci_id.required'    => 'Veuillez sélectionner une SCI.',
@@ -198,7 +198,7 @@ class FinancialCurrentController extends Controller
             'label'          => ['nullable', 'string', 'max:255'],
             'amount'         => ['required', 'numeric', 'min:0'],
             'payment_date'   => ['nullable', 'date'],
-            'payment_method' => ['nullable', 'in:especes,virement,cheque,mobile_money'],
+            'payment_method' => ['nullable', 'in:especes,virement,cheque,mobile_money,versement_especes,depot_bancaire'],
             'receipt'        => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ], [
             'sci_id.required'      => 'Veuillez sélectionner une SCI.',

@@ -52,7 +52,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Methode</p>
-                        @php $methodLabels = ['virement' => 'Virement', 'especes' => 'Especes', 'cheque' => 'Cheque', 'mobile_money' => 'Mobile Money']; @endphp
+                        @php $methodLabels = ['virement' => 'Virement', 'especes' => 'Especes', 'cheque' => 'Cheque', 'mobile_money' => 'Mobile Money', 'versement_especes' => 'Versement especes sur compte', 'depot_bancaire' => 'Depot bancaire']; @endphp
                         <p class="text-sm font-semibold text-gray-900">{{ $methodLabels[$payment->method] ?? ucfirst($payment->method ?? '-') }}</p>
                     </div>
                 </div>

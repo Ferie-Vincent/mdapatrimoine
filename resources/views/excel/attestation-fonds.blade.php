@@ -111,6 +111,8 @@
                                 @case('virement') Virement bancaire @break
                                 @case('cheque') Chèque @break
                                 @case('mobile_money') Mobile Money @break
+                                @case('versement_especes') Versement espèces sur compte @break
+                                @case('depot_bancaire') Dépôt bancaire @break
                                 @default {{ $paymentMethod }}
                             @endswitch
                         </strong>

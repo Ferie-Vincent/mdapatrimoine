@@ -28,7 +28,7 @@ class StoreLeaseRequest extends FormRequest
             'rent_amount'         => ['required', 'numeric', 'min:0'],
             'charges_amount'      => ['nullable', 'numeric', 'min:0'],
             'deposit_amount'      => ['nullable', 'numeric', 'min:0'],
-            'payment_method'      => ['required', 'in:virement,especes,cheque,mobile_money,autre'],
+            'payment_method'      => ['required', 'in:virement,especes,cheque,mobile_money,versement_especes,depot_bancaire,autre'],
             'due_day'             => ['required', 'integer', 'min:1', 'max:28'],
             'penalty_rate'        => ['nullable', 'numeric', 'min:0'],
             'penalty_delay_days'  => ['nullable', 'integer', 'min:0'],

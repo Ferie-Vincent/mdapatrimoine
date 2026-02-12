@@ -160,6 +160,8 @@
                                         @case('virement') Virement @break
                                         @case('cheque') Chèque @break
                                         @case('mobile_money') Mobile Money @break
+                                        @case('versement_especes') Versement espèces sur compte @break
+                                        @case('depot_bancaire') Dépôt bancaire @break
                                         @default - @break
                                     @endswitch
                                 </td>
@@ -304,6 +306,8 @@
                         <option value="virement">Virement</option>
                         <option value="cheque">Chèque</option>
                         <option value="mobile_money">Mobile Money</option>
+                        <option value="versement_especes">Versement espèces sur compte</option>
+                        <option value="depot_bancaire">Dépôt bancaire</option>
                     </select>
                 </div>
                 <div>

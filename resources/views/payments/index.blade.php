@@ -25,6 +25,8 @@
                     <option value="virement" {{ request('method') === 'virement' ? 'selected' : '' }}>Virement</option>
                     <option value="cheque" {{ request('method') === 'cheque' ? 'selected' : '' }}>Chèque</option>
                     <option value="mobile_money" {{ request('method') === 'mobile_money' ? 'selected' : '' }}>Mobile Money</option>
+                    <option value="versement_especes" {{ request('method') === 'versement_especes' ? 'selected' : '' }}>Versement especes sur compte</option>
+                    <option value="depot_bancaire" {{ request('method') === 'depot_bancaire' ? 'selected' : '' }}>Depot bancaire</option>
                 </select>
             </div>
             <div>

@@ -169,6 +169,8 @@
                                 <option value="virement">Virement</option>
                                 <option value="cheque">Cheque</option>
                                 <option value="mobile_money">Mobile Money</option>
+                                <option value="versement_especes">Versement especes sur compte</option>
+                                <option value="depot_bancaire">Depot bancaire</option>
                             </select>
                             <template x-if="errors.method"><p class="mt-1 text-sm text-red-600" x-text="errors.method[0]"></p></template>
                         </div>

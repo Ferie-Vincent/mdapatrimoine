@@ -108,7 +108,7 @@ class PaymentController extends Controller
             'lease_id'    => ['required', 'exists:leases,id'],
             'amount'      => ['required', 'numeric', 'min:0.01'],
             'refunded_at' => ['required', 'date'],
-            'method'      => ['required', 'in:especes,virement,cheque,mobile_money'],
+            'method'      => ['required', 'in:especes,virement,cheque,mobile_money,versement_especes,depot_bancaire'],
             'reference'   => ['nullable', 'string', 'max:255'],
             'note'        => ['nullable', 'string'],
             'receipt'     => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
