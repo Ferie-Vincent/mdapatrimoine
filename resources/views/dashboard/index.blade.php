@@ -32,7 +32,7 @@
     </div>
 
     {{-- Vue globale - Row 1: Financier --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <x-stat-card
             title="Total attendu"
             :value="number_format($stats['total_expected'], 0, ',', ' ') . ' FCFA'"
@@ -64,14 +64,6 @@
             :subtitle="$stats['upcoming_count'] . ' echeance(s)'"
             icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>'
         />
-        <x-stat-card
-            title="Taux recouvrement"
-            :value="number_format($stats['recovery_rate'], 1, ',', ' ') . ' %'"
-            color="orange"
-            trend="{{ $stats['recovery_rate'] >= 80 ? 'up' : 'down' }}"
-            :trendValue="number_format($stats['recovery_rate'], 1) . '%'"
-            icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>'
-        />
     </div>
 
     {{-- Vue globale - Row 2: Patrimoine --}}
@@ -94,11 +86,10 @@
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-semibold text-gray-900">Mois en cours ({{ $monthStats['label'] }})</h2>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <x-stat-card title="Attendu ce mois" :value="number_format($monthStats['expected'], 0, ',', ' ') . ' FCFA'" color="blue" />
         <x-stat-card title="Encaisse ce mois" :value="number_format($monthStats['collected'], 0, ',', ' ') . ' FCFA'" color="green" />
         <x-stat-card title="Impaye ce mois" :value="number_format($monthStats['unpaid'], 0, ',', ' ') . ' FCFA'" color="red" />
-        <x-stat-card title="Taux ce mois" :value="number_format($monthStats['recovery_rate'], 1, ',', ' ') . ' %'" color="orange" />
     </div>
 
     {{-- Secondary metric cards row --}}

@@ -4,6 +4,37 @@
 
 @section('content')
 
+    {{-- Recovery KPIs --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <x-stat-card
+            title="Taux recouvrement global"
+            :value="number_format($recoveryStats['global_rate'], 1, ',', ' ') . ' %'"
+            color="orange"
+            trend="{{ $recoveryStats['global_rate'] >= 80 ? 'up' : 'down' }}"
+            :trendValue="number_format($recoveryStats['global_rate'], 1) . '%'"
+            icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>'
+        />
+        <x-stat-card
+            title="Taux du mois ({{ $recoveryStats['month_label'] }})"
+            :value="number_format($recoveryStats['month_rate'], 1, ',', ' ') . ' %'"
+            color="{{ $recoveryStats['month_rate'] >= 80 ? 'green' : ($recoveryStats['month_rate'] >= 50 ? 'orange' : 'red') }}"
+            icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>'
+        />
+        <x-stat-card
+            title="Encaisse / Attendu"
+            :value="number_format($recoveryStats['total_collected'], 0, ',', ' ') . ' F'"
+            color="green"
+            :subtitle="'sur ' . number_format($recoveryStats['total_expected'], 0, ',', ' ') . ' F attendus'"
+            icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+        />
+        <x-stat-card
+            title="Reste a recouvrer"
+            :value="number_format($recoveryStats['total_unpaid'], 0, ',', ' ') . ' F'"
+            color="red"
+            icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>'
+        />
+    </div>
+
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-semibold text-gray-900">Comparaison des SCIs</h2>
     </div>

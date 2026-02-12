@@ -61,6 +61,33 @@ class AnalyticsController extends Controller
             ];
         });
 
-        return view('analytics.index', compact('comparison'));
+        // Global recovery KPIs
+        $totalExpected = $comparison->sum('expected');
+        $totalCollected = $comparison->sum('collected');
+        $totalUnpaid = $comparison->sum('unpaid');
+        $globalRecoveryRate = $totalExpected > 0 ? round(($totalCollected / $totalExpected) * 100, 1) : 0;
+
+        // Current month recovery
+        $currentMonth = now()->format('Y-m');
+        $monthData = LeaseMonthly::whereIn('sci_id', $sciIds)
+            ->where('month', $currentMonth)
+            ->selectRaw('SUM(total_due) as expected, SUM(paid_amount) as collected')
+            ->first();
+        $monthExpected = (float) ($monthData->expected ?? 0);
+        $monthCollected = (float) ($monthData->collected ?? 0);
+        $monthRecoveryRate = $monthExpected > 0 ? round(($monthCollected / $monthExpected) * 100, 1) : 0;
+
+        $recoveryStats = [
+            'global_rate' => $globalRecoveryRate,
+            'total_expected' => $totalExpected,
+            'total_collected' => $totalCollected,
+            'total_unpaid' => $totalUnpaid,
+            'month_label' => $currentMonth,
+            'month_rate' => $monthRecoveryRate,
+            'month_expected' => $monthExpected,
+            'month_collected' => $monthCollected,
+        ];
+
+        return view('analytics.index', compact('comparison', 'recoveryStats'));
     }
 }
