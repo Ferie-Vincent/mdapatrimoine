@@ -15,6 +15,7 @@
     x-data="wizardModal()"
     x-init="initSteps($el)"
     data-steps='@json($steps)'
+    data-modal-title="{{ $title }}"
     x-on:open-modal.window="$event.detail == '{{ $name }}' ? open() : null"
     x-on:close-modal.window="$event.detail == '{{ $name }}' ? close() : null"
     x-on:keydown.escape.window="close()"

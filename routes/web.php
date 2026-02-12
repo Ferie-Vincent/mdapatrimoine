@@ -48,6 +48,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 */
 Route::middleware(['auth', 'verified', SetActiveSci::class])->group(function () {
 
+    // CSRF token refresh (for offline sync replay)
+    Route::get('/csrf-token', fn () => response()->json(['token' => csrf_token()]))->name('csrf-token');
+
     // Dashboard & SCI switching (all roles)
     Route::post('/switch-sci', [DashboardController::class, 'switchSci'])->name('switch-sci');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -59,6 +59,373 @@ window.toast = function (message, type = 'error', duration = 0) {
     }
 };
 
+// ============================================================================
+// Offline Sync Queue Manager (IndexedDB)
+// ============================================================================
+class OfflineQueue {
+    constructor() {
+        this.dbName = 'scimanager-offline';
+        this.storeName = 'sync-queue';
+        this.db = null;
+    }
+
+    async open() {
+        if (this.db) return this.db;
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(this.dbName, 1);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(this.storeName)) {
+                    const store = db.createObjectStore(this.storeName, { keyPath: 'id', autoIncrement: true });
+                    store.createIndex('status', 'status', { unique: false });
+                    store.createIndex('createdAt', 'createdAt', { unique: false });
+                }
+            };
+            req.onsuccess = (e) => { this.db = e.target.result; resolve(this.db); };
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    async enqueue(entry) {
+        const db = await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(this.storeName, 'readwrite');
+            const req = tx.objectStore(this.storeName).add({
+                ...entry, status: 'pending', createdAt: Date.now(), attempts: 0, lastError: null,
+            });
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    async getPending() {
+        const db = await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(this.storeName, 'readonly');
+            const req = tx.objectStore(this.storeName).index('status').getAll('pending');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    async getAll() {
+        const db = await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(this.storeName, 'readonly');
+            const req = tx.objectStore(this.storeName).getAll();
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    async update(id, changes) {
+        const db = await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(this.storeName, 'readwrite');
+            const store = tx.objectStore(this.storeName);
+            const getReq = store.get(id);
+            getReq.onsuccess = () => {
+                const record = getReq.result;
+                if (!record) return reject(new Error('Not found'));
+                Object.assign(record, changes);
+                const putReq = store.put(record);
+                putReq.onsuccess = () => resolve();
+                putReq.onerror = () => reject(putReq.error);
+            };
+        });
+    }
+
+    async delete(id) {
+        const db = await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(this.storeName, 'readwrite');
+            tx.objectStore(this.storeName).delete(id);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+        });
+    }
+
+    async count() {
+        const db = await this.open();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(this.storeName, 'readonly');
+            const req = tx.objectStore(this.storeName).index('status').count('pending');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+}
+
+window._offlineQueue = new OfflineQueue();
+
+// ============================================================================
+// FormData Serialization Helpers
+// ============================================================================
+function serializeFormData(formData) {
+    const parts = [];
+    for (const [name, value] of formData.entries()) {
+        if (value instanceof File && value.size > 0) {
+            parts.push({ name, fileName: value.name, type: value.type, blob: value });
+        } else if (!(value instanceof File)) {
+            parts.push({ name, value: String(value) });
+        }
+    }
+    return parts;
+}
+
+function rebuildFormData(parts) {
+    const fd = new FormData();
+    for (const part of parts) {
+        if (part.blob) {
+            fd.append(part.name, part.blob, part.fileName);
+        } else {
+            fd.append(part.name, part.value);
+        }
+    }
+    return fd;
+}
+
+// ============================================================================
+// Offline-Aware Form Submission
+// ============================================================================
+async function queueRequest(form, bodyParts, description, onQueued) {
+    const filtered = bodyParts.filter(p => p.name !== '_token');
+    await window._offlineQueue.enqueue({
+        url: form.action,
+        method: 'POST',
+        bodyParts: filtered,
+        formOrigin: window.location.href,
+        description: description || 'Formulaire en attente',
+    });
+    window.dispatchEvent(new CustomEvent('offline-queue-changed'));
+    window.toast('Hors ligne : donnees enregistrees localement. Elles seront envoyees automatiquement.', 'info', 6000);
+    onQueued && onQueued();
+    return { queued: true };
+}
+
+async function offlineAwareSubmit(form, { onSuccess, onValidationError, onError, onQueued, description }) {
+    const formData = new FormData(form);
+    const csrfToken = document.querySelector('meta[name=csrf-token]').content;
+    const bodyParts = serializeFormData(formData);
+
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            body: formData,
+        });
+
+        if (response.status === 503) {
+            const data = await response.json();
+            if (data._offline_queued) {
+                return await queueRequest(form, bodyParts, description, onQueued);
+            }
+        }
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            onSuccess && onSuccess(result);
+        } else if (response.status === 422 && result.errors) {
+            onValidationError && onValidationError(result);
+        } else {
+            onError && onError(result.message || 'Une erreur est survenue.');
+        }
+        return { queued: false, response, result };
+    } catch (err) {
+        if (!navigator.onLine) {
+            return await queueRequest(form, bodyParts, description, onQueued);
+        }
+        onError && onError('Erreur de connexion. Veuillez reessayer.');
+        return { queued: false, error: err };
+    }
+}
+
+window.offlineAwareSubmit = offlineAwareSubmit;
+
+// ============================================================================
+// Sync Manager (replays queue when back online)
+// ============================================================================
+class SyncManager {
+    constructor() { this.syncing = false; }
+
+    async refreshCsrfToken() {
+        try {
+            const res = await fetch('/csrf-token', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+            if (res.ok) {
+                const data = await res.json();
+                document.querySelector('meta[name=csrf-token]').content = data.token;
+                return data.token;
+            }
+        } catch (e) { /* still offline */ }
+        return null;
+    }
+
+    async processQueue() {
+        if (this.syncing || !navigator.onLine) return;
+        this.syncing = true;
+
+        try {
+            const csrfToken = await this.refreshCsrfToken();
+            if (!csrfToken) { this.syncing = false; return; }
+
+            const pending = await window._offlineQueue.getPending();
+            if (pending.length === 0) { this.syncing = false; return; }
+
+            let successCount = 0, failCount = 0;
+
+            for (const entry of pending) {
+                await window._offlineQueue.update(entry.id, { status: 'syncing' });
+                window.dispatchEvent(new CustomEvent('offline-queue-changed'));
+
+                try {
+                    const formData = rebuildFormData(entry.bodyParts);
+                    const response = await fetch(entry.url, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                        body: formData,
+                        credentials: 'same-origin',
+                    });
+
+                    if (response.ok) {
+                        await window._offlineQueue.delete(entry.id);
+                        successCount++;
+                    } else if (response.status === 422) {
+                        const result = await response.json();
+                        await window._offlineQueue.update(entry.id, {
+                            status: 'failed', attempts: entry.attempts + 1,
+                            lastError: Object.values(result.errors || {}).flat().join(', ') || result.message || 'Erreur de validation',
+                        });
+                        failCount++;
+                    } else if (response.status === 419) {
+                        await window._offlineQueue.update(entry.id, { status: 'pending' });
+                        break;
+                    } else {
+                        await window._offlineQueue.update(entry.id, {
+                            status: 'failed', attempts: entry.attempts + 1,
+                            lastError: 'Erreur serveur (' + response.status + ')',
+                        });
+                        failCount++;
+                    }
+                } catch (err) {
+                    await window._offlineQueue.update(entry.id, { status: 'pending' });
+                    break;
+                }
+            }
+
+            window.dispatchEvent(new CustomEvent('offline-queue-changed'));
+
+            if (successCount > 0) {
+                window.toast(successCount + ' element(s) synchronise(s) avec succes.', 'success', 5000);
+            }
+            if (failCount > 0) {
+                window.toast(failCount + ' element(s) en erreur de synchronisation.', 'warning', 8000);
+            }
+        } finally {
+            this.syncing = false;
+        }
+    }
+}
+
+window._syncManager = new SyncManager();
+
+window.addEventListener('online', () => {
+    setTimeout(() => window._syncManager.processQueue(), 2000);
+});
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'PROCESS_SYNC') {
+            window._syncManager.processQueue();
+        }
+    });
+}
+
+// ============================================================================
+// Connection Status Alpine Component
+// ============================================================================
+Alpine.data('connectionStatus', () => ({
+    online: navigator.onLine,
+    pendingCount: 0,
+    failedCount: 0,
+    showDetails: false,
+    queueItems: [],
+
+    async init() {
+        window.addEventListener('online', () => { this.online = true; this.refreshCount(); });
+        window.addEventListener('offline', () => { this.online = false; });
+        window.addEventListener('offline-queue-changed', () => this.refreshCount());
+        await this.refreshCount();
+        setInterval(() => this.refreshCount(), 30000);
+    },
+
+    async refreshCount() {
+        try {
+            const all = await window._offlineQueue.getAll();
+            this.pendingCount = all.filter(i => i.status === 'pending' || i.status === 'syncing').length;
+            this.failedCount = all.filter(i => i.status === 'failed').length;
+            this.queueItems = all;
+        } catch (e) {
+            this.pendingCount = 0;
+            this.failedCount = 0;
+        }
+    },
+
+    async retryFailed() {
+        const failed = this.queueItems.filter(i => i.status === 'failed');
+        for (const item of failed) {
+            await window._offlineQueue.update(item.id, { status: 'pending', lastError: null });
+        }
+        window.dispatchEvent(new CustomEvent('offline-queue-changed'));
+        window._syncManager.processQueue();
+    },
+
+    async discardItem(id) {
+        await window._offlineQueue.delete(id);
+        window.dispatchEvent(new CustomEvent('offline-queue-changed'));
+    },
+
+    async syncNow() {
+        if (!navigator.onLine) { window.toast('Pas de connexion internet.', 'warning'); return; }
+        window._syncManager.processQueue();
+    },
+
+    get totalPending() { return this.pendingCount + this.failedCount; },
+}));
+
+// ============================================================================
+// Global Form Interceptor (for raw POST forms when offline)
+// ============================================================================
+document.addEventListener('submit', async function (e) {
+    const form = e.target;
+    if (form.method.toUpperCase() !== 'POST') return;
+    if (form.hasAttribute('data-no-offline')) return;
+    if (form.querySelector('input[name="_method"][value="DELETE"]')) return;
+
+    const skipPaths = ['/login', '/logout', '/register', '/switch-sci', '/password', '/email/verification'];
+    const action = form.action || '';
+    if (skipPaths.some(p => action.includes(p))) return;
+
+    if (navigator.onLine) return;
+
+    e.preventDefault();
+    const formData = new FormData(form);
+    const bodyParts = serializeFormData(formData).filter(p => p.name !== '_token');
+    const title = form.closest('[x-data]')?.querySelector('h3,h2')?.textContent?.trim() || 'Formulaire en attente';
+
+    await window._offlineQueue.enqueue({
+        url: form.action, method: 'POST', bodyParts,
+        formOrigin: window.location.href, description: title,
+    });
+
+    window.dispatchEvent(new CustomEvent('offline-queue-changed'));
+    window.toast('Hors ligne : donnees enregistrees localement.', 'info', 6000);
+    window.dispatchEvent(new CustomEvent('close-modal'));
+}, true);
+
+// ============================================================================
+// Alpine Components
+// ============================================================================
 Alpine.data('wizardModal', () => ({
     show: false,
     loading: false,
@@ -111,24 +478,15 @@ Alpine.data('wizardModal', () => ({
         this.errors = {};
 
         const form = e.target;
-        const formData = new FormData(form);
+        const modalTitle = this.$el.dataset.modalTitle || 'Formulaire';
 
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                },
-                body: formData,
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
+        await offlineAwareSubmit(form, {
+            description: modalTitle,
+            onSuccess: () => {
                 this.close();
                 window.location.reload();
-            } else if (response.status === 422 && result.errors) {
+            },
+            onValidationError: (result) => {
                 this.errors = result.errors;
                 const errorFields = Object.keys(result.errors);
                 const messages = errorFields.flatMap(f => result.errors[f]);
@@ -142,18 +500,17 @@ Alpine.data('wizardModal', () => ({
                         }
                     }
                 }
-            } else {
-                const msg = result.message || 'Une erreur est survenue.';
+            },
+            onError: (msg) => {
                 this.errors = { _general: [msg] };
                 window.toast(msg, 'error');
-            }
-        } catch (err) {
-            const msg = 'Erreur de connexion. Veuillez reessayer.';
-            this.errors = { _general: [msg] };
-            window.toast(msg, 'error');
-        } finally {
-            this.loading = false;
-        }
+            },
+            onQueued: () => {
+                this.close();
+            },
+        });
+
+        this.loading = false;
     }
 }));
 

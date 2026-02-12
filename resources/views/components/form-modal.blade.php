@@ -32,39 +32,20 @@
             this.errors = {};
 
             const form = e.target;
-            const formData = new FormData(form);
 
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                    },
-                    body: formData,
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    this.close();
-                    window.location.reload();
-                } else if (response.status === 422 && result.errors) {
+            await window.offlineAwareSubmit(form, {
+                description: '{{ $title }}',
+                onSuccess: () => { this.close(); window.location.reload(); },
+                onValidationError: (result) => {
                     this.errors = result.errors;
                     const messages = Object.keys(result.errors).flatMap(f => result.errors[f]);
                     window.toast(messages.join('<br>'), 'error');
-                } else {
-                    const msg = result.message || 'Une erreur est survenue.';
-                    this.errors = { _general: [msg] };
-                    window.toast(msg, 'error');
-                }
-            } catch (err) {
-                const msg = 'Erreur de connexion. Veuillez reessayer.';
-                this.errors = { _general: [msg] };
-                window.toast(msg, 'error');
-            } finally {
-                this.loading = false;
-            }
+                },
+                onError: (msg) => { this.errors = { _general: [msg] }; window.toast(msg, 'error'); },
+                onQueued: () => { this.close(); },
+            });
+
+            this.loading = false;
         }
     }"
     x-on:open-modal.window="$event.detail == '{{ $name }}' ? open($event.detail) : null"

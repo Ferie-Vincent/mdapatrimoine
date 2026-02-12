@@ -101,7 +101,7 @@
                      class="mt-1.5 bg-sidebar-light border border-white/10 rounded-lg shadow-lg overflow-hidden">
                     @isset($userScis)
                         @if(auth()->user()->isSuperAdmin())
-                            <form method="POST" action="{{ route('switch-sci') }}">
+                            <form method="POST" action="{{ route('switch-sci') }}" data-no-offline>
                                 @csrf
                                 <input type="hidden" name="sci_id" value="">
                                 <button type="submit"
@@ -112,7 +112,7 @@
                             </form>
                         @endif
                         @foreach($userScis as $sci)
-                            <form method="POST" action="{{ route('switch-sci') }}">
+                            <form method="POST" action="{{ route('switch-sci') }}" data-no-offline>
                                 @csrf
                                 <input type="hidden" name="sci_id" value="{{ $sci->id }}">
                                 <button type="submit"
@@ -299,7 +299,7 @@
                             <p class="text-xs text-white/40 truncate">{{ Auth::user()->email ?? '' }}</p>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout') }}" data-no-offline>
                         @csrf
                         <button type="submit" class="p-1.5 rounded-lg text-white/40 hover:text-red-400 hover:bg-white/10 transition" title="Deconnexion">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -404,6 +404,77 @@
                             </div>
                         </div>
 
+                        {{-- Connection Status Indicator --}}
+                        <div x-data="connectionStatus()" class="relative">
+                            <button @click="showDetails = !showDetails"
+                                    class="relative p-2 rounded-lg transition"
+                                    :class="online ? 'text-gray-400 hover:bg-gray-100 hover:text-gray-600' : 'text-red-500 hover:bg-red-50 animate-pulse'"
+                                    :title="online ? 'En ligne' : 'Hors ligne'">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                          d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.858 15.355-5.858 21.213 0"/>
+                                </svg>
+                                <span x-show="!online" class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                                <span x-show="totalPending > 0" x-text="totalPending"
+                                      class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold text-white bg-accent-orange-400 rounded-full px-1"></span>
+                            </button>
+
+                            <div x-show="showDetails" @click.away="showDetails = false" x-transition
+                                 class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden" style="display:none;">
+                                <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2" :class="online ? 'bg-green-50' : 'bg-red-50'">
+                                    <div class="w-2.5 h-2.5 rounded-full shrink-0" :class="online ? 'bg-green-500' : 'bg-red-500'"></div>
+                                    <span class="text-sm font-medium" :class="online ? 'text-green-700' : 'text-red-700'" x-text="online ? 'Connecte' : 'Hors ligne'"></span>
+                                </div>
+
+                                <div class="p-4">
+                                    <template x-if="totalPending === 0">
+                                        <p class="text-sm text-gray-400 text-center py-2">Aucune donnee en attente de synchronisation</p>
+                                    </template>
+
+                                    <template x-if="pendingCount > 0">
+                                        <div class="mb-3">
+                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">En attente</p>
+                                            <template x-for="item in queueItems.filter(i => i.status === 'pending' || i.status === 'syncing')" :key="item.id">
+                                                <div class="flex items-center justify-between py-1.5 text-sm">
+                                                    <div class="flex items-center gap-2 min-w-0">
+                                                        <div class="w-1.5 h-1.5 rounded-full shrink-0" :class="item.status === 'syncing' ? 'bg-blue-500 animate-pulse' : 'bg-orange-400'"></div>
+                                                        <span class="text-gray-700 truncate" x-text="item.description"></span>
+                                                    </div>
+                                                    <span x-show="item.status === 'syncing'" class="text-xs text-blue-500 shrink-0 ml-2">Envoi...</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="failedCount > 0">
+                                        <div class="mb-3">
+                                            <p class="text-xs font-medium text-red-500 uppercase tracking-wider mb-2">Erreurs</p>
+                                            <template x-for="item in queueItems.filter(i => i.status === 'failed')" :key="item.id">
+                                                <div class="py-1.5">
+                                                    <div class="flex items-center justify-between text-sm">
+                                                        <span class="text-gray-700 truncate" x-text="item.description"></span>
+                                                        <button @click="discardItem(item.id)" class="text-red-400 hover:text-red-600 text-xs shrink-0 ml-2">Supprimer</button>
+                                                    </div>
+                                                    <p class="text-xs text-red-400 mt-0.5 truncate" x-text="item.lastError"></p>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <div class="flex gap-2 mt-3 pt-3 border-t border-gray-100" x-show="totalPending > 0">
+                                        <button @click="syncNow()" x-show="online && pendingCount > 0"
+                                                class="flex-1 text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg px-3 py-2 transition">
+                                            Synchroniser
+                                        </button>
+                                        <button @click="retryFailed()" x-show="failedCount > 0"
+                                                class="flex-1 text-xs font-medium text-accent-orange-500 border border-accent-orange-300 hover:bg-orange-50 rounded-lg px-3 py-2 transition">
+                                            Reessayer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Notification bell --}}
                         <button class="relative p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,7 +504,7 @@
                                     <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</p>
                                     <p class="text-xs text-gray-400">{{ Auth::user()->email ?? '' }}</p>
                                 </div>
-                                <form method="POST" action="{{ route('logout') }}">
+                                <form method="POST" action="{{ route('logout') }}" data-no-offline>
                                     @csrf
                                     <button type="submit" class="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>

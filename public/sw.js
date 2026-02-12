@@ -1,4 +1,4 @@
-const CACHE_NAME = 'scimanager-v2';
+const CACHE_NAME = 'scimanager-v3';
 const STATIC_ASSETS = [
     '/assets/img/logo.jpg',
     '/assets/img/logo-2.jpg',
@@ -25,15 +25,37 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch: Network First for HTML, Cache First for static assets
+// Message listener for sync triggers
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SYNC_QUEUE') {
+        self.clients.matchAll().then(clients => {
+            clients.forEach(client => client.postMessage({ type: 'PROCESS_SYNC' }));
+        });
+    }
+});
+
+// Fetch handler
 self.addEventListener('fetch', (event) => {
     const { request } = event;
 
-    // Skip non-GET requests
-    if (request.method !== 'GET') return;
-
-    // Skip Chrome extensions and other non-http
+    // Skip non-http
     if (!request.url.startsWith('http')) return;
+
+    // POST/PUT/DELETE: try network, return offline signal on failure
+    if (request.method !== 'GET') {
+        event.respondWith(
+            fetch(request.clone()).catch(() => {
+                return new Response(
+                    JSON.stringify({
+                        _offline_queued: true,
+                        message: 'Vous etes hors ligne. La requete sera envoyee automatiquement.'
+                    }),
+                    { status: 503, headers: { 'Content-Type': 'application/json' } }
+                );
+            })
+        );
+        return;
+    }
 
     const url = new URL(request.url);
 
@@ -73,7 +95,7 @@ self.addEventListener('fetch', (event) => {
                     return caches.match(request).then((cached) => {
                         if (cached) return cached;
                         return new Response(
-                            '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors ligne</title><style>body{font-family:Nunito,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f3f4f6;color:#374151;text-align:center}h1{font-size:1.5rem;margin-bottom:.5rem}p{color:#6b7280}</style></head><body><div><h1>Vous êtes hors ligne</h1><p>Vérifiez votre connexion internet et réessayez.</p></div></body></html>',
+                            '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hors ligne</title><style>body{font-family:Nunito,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f3f4f6;color:#374151;text-align:center}h1{font-size:1.5rem;margin-bottom:.5rem}p{color:#6b7280}</style></head><body><div><h1>Vous etes hors ligne</h1><p>Les donnees saisies seront synchronisees automatiquement au retour de la connexion.</p></div></body></html>',
                             { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
                         );
                     });
