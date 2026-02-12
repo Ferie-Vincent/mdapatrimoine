@@ -729,7 +729,7 @@
             const headers = el.querySelectorAll('thead th');
             const lastIdx = headers.length - 1;
             const lastText = headers[lastIdx] ? headers[lastIdx].textContent.trim().toLowerCase() : '';
-            const lastIsActions = !lastText || lastText === 'actions';
+            const lastIsActions = !lastText || lastText === 'actions' || lastText === 'action';
             const columns = Array.from(headers).map((_, i) => {
                 if (i === lastIdx && lastIsActions) return { select: i, sortable: false };
                 return { select: i };
@@ -745,6 +745,15 @@
                 columns: columns,
             }, options));
         }
+        // Event delegation for modal buttons inside DataTables
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-open-modal]');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent('open-modal', { detail: btn.getAttribute('data-open-modal') }));
+            }
+        });
     </script>
     <script>
         function globalSearch() {

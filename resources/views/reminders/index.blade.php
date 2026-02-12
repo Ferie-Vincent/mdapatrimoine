@@ -254,7 +254,7 @@
                                         </form>
                                         @endcan
                                     @endif
-                                    <button type="button" onclick="window.dispatchEvent(new CustomEvent('open-modal', {detail: 'reminder-message-{{ $reminder->id }}'}))"
+                                    <button type="button" data-open-modal="reminder-message-{{ $reminder->id }}"
                                             class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition">
                                         <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
