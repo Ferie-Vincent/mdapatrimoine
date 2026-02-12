@@ -1,9 +1,10 @@
-const CACHE_NAME = 'scimanager-v1';
+const CACHE_NAME = 'scimanager-v2';
 const STATIC_ASSETS = [
     '/assets/img/logo.jpg',
     '/assets/img/logo-2.jpg',
     '/assets/img/pwa-192.png',
     '/assets/img/pwa-512.png',
+    '/assets/img/apple-touch-icon.png',
 ];
 
 // Install: cache static assets
