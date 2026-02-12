@@ -54,12 +54,12 @@ class LeaseService
             if ($lease->status === 'actif') {
                 $this->monthlyService->generateForLease($lease);
 
-                // Auto-calculate entry amounts
+                // Fill entry amounts: use form values if provided, otherwise auto-calculate
                 $rentAmount = (float) $lease->rent_amount;
                 $lease->update([
-                    'caution_2_mois'        => $rentAmount * 2,
-                    'loyers_avances_2_mois' => $rentAmount * 2,
-                    'frais_agence'          => $rentAmount,
+                    'caution_2_mois'        => $data['caution_2_mois'] ?? $rentAmount * 2,
+                    'loyers_avances_2_mois' => $data['loyers_avances_2_mois'] ?? $rentAmount * 2,
+                    'frais_agence'          => $data['frais_agence'] ?? $rentAmount,
                     'deposit_amount'        => $data['deposit_amount'] ?? $rentAmount * 2,
                 ]);
 
