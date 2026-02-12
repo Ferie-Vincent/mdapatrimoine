@@ -106,6 +106,10 @@
             color: #c0392b;
             font-weight: bold;
         }
+        .status-a_venir {
+            color: #2980b9;
+            font-weight: bold;
+        }
         .footer {
             position: fixed;
             bottom: 0;
@@ -148,6 +152,7 @@
             'impaye' => 'Impayé',
             'partiel' => 'Partiel',
             'en_retard' => 'En retard',
+            'a_venir' => 'A venir',
         ];
     @endphp
 

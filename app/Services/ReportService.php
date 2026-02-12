@@ -41,17 +41,26 @@ class ReportService
 
         $totalExpected  = (float) $allMonthlies->sum('total_due');
         $totalCollected = (float) $allMonthlies->sum('paid_amount');
-        $totalUnpaid    = (float) $allMonthlies->sum('remaining_amount');
-        $recoveryRate   = $totalExpected > 0
-            ? round(($totalCollected / $totalExpected) * 100, 2)
+
+        // Exclude 'a_venir' from unpaid (these are future, not yet due)
+        $upcomingMonthlies = $allMonthlies->where('status', 'a_venir');
+        $totalUpcoming  = (float) $upcomingMonthlies->sum('remaining_amount');
+        $upcomingCount  = $upcomingMonthlies->count();
+        $totalUnpaid    = (float) $allMonthlies->where('status', '!=', 'a_venir')->sum('remaining_amount');
+
+        // Recovery rate based on exigible amounts only (excluding upcoming)
+        $exigibleExpected = $totalExpected - $totalUpcoming;
+        $recoveryRate   = $exigibleExpected > 0
+            ? round(($totalCollected / $exigibleExpected) * 100, 2)
             : 0.0;
 
-        // ── Current month KPIs ──
+        // ── Current month KPIs (exclude a_venir) ──
         $currentMonthlies = $allMonthlies->where('month', $currentMonth);
+        $currentExigible = $currentMonthlies->where('status', '!=', 'a_venir');
 
-        $monthExpected  = (float) $currentMonthlies->sum('total_due');
-        $monthCollected = (float) $currentMonthlies->sum('paid_amount');
-        $monthUnpaid    = (float) $currentMonthlies->sum('remaining_amount');
+        $monthExpected  = (float) $currentExigible->sum('total_due');
+        $monthCollected = (float) $currentExigible->sum('paid_amount');
+        $monthUnpaid    = (float) $currentExigible->sum('remaining_amount');
         $monthRecoveryRate = $monthExpected > 0
             ? round(($monthCollected / $monthExpected) * 100, 2)
             : 0.0;
@@ -99,6 +108,8 @@ class ReportService
             'properties_count'    => $propertiesCount,
             'active_leases_count' => $activeLeasesCount,
             'overdue_monthlies'   => $overdueMonthlies,
+            'total_upcoming'      => $totalUpcoming,
+            'upcoming_count'      => $upcomingCount,
         ];
     }
 
@@ -124,9 +135,9 @@ class ReportService
             $monthlyTrend[] = [
                 'month'     => $date->translatedFormat('M Y'),
                 'month_key' => $month,
-                'expected'  => (float) $monthlies->sum('total_due'),
+                'expected'  => (float) $monthlies->where('status', '!=', 'a_venir')->sum('total_due'),
                 'collected' => (float) $monthlies->sum('paid_amount'),
-                'unpaid'    => (float) $monthlies->sum('remaining_amount'),
+                'unpaid'    => (float) $monthlies->where('status', '!=', 'a_venir')->sum('remaining_amount'),
             ];
         }
 
@@ -201,7 +212,7 @@ class ReportService
             if ($sciId !== null) {
                 $query->where('sci_id', $sciId);
             }
-            $monthlies = $query->get();
+            $monthlies = $query->where('status', '!=', 'a_venir')->get();
             $totalDue = (float) $monthlies->sum('total_due');
             $remaining = (float) $monthlies->sum('remaining_amount');
             $unpaidTrend[] = $totalDue > 0 ? round(($remaining / $totalDue) * 100, 1) : 0;

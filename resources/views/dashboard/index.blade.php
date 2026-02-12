@@ -32,7 +32,7 @@
     </div>
 
     {{-- Vue globale - Row 1: Financier --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
         <x-stat-card
             title="Total attendu"
             :value="number_format($stats['total_expected'], 0, ',', ' ') . ' FCFA'"
@@ -56,6 +56,13 @@
             trend="{{ $stats['total_unpaid'] > 0 ? 'down' : 'up' }}"
             :trendValue="number_format($stats['total_unpaid'], 0, ',', ' ') . ' F'"
             icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>'
+        />
+        <x-stat-card
+            title="A venir"
+            :value="number_format($stats['total_upcoming'], 0, ',', ' ') . ' FCFA'"
+            color="blue"
+            :subtitle="$stats['upcoming_count'] . ' echeance(s)'"
+            icon='<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>'
         />
         <x-stat-card
             title="Taux recouvrement"

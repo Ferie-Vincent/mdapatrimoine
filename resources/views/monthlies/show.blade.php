@@ -71,9 +71,9 @@
                 </div>
             </div>
             @php
-                $mStatusColors = ['paye' => 'bg-emerald-400/20 text-emerald-300 ring-emerald-400/30', 'impaye' => 'bg-red-400/20 text-red-300 ring-red-400/30', 'partiel' => 'bg-amber-400/20 text-amber-300 ring-amber-400/30', 'en_retard' => 'bg-red-400/20 text-red-300 ring-red-400/30'];
-                $mDotColors = ['paye' => 'bg-emerald-400', 'impaye' => 'bg-red-400', 'partiel' => 'bg-amber-400', 'en_retard' => 'bg-red-400'];
-                $mLabels = ['paye' => 'Paye', 'impaye' => 'Impaye', 'partiel' => 'Partiel', 'en_retard' => 'En retard'];
+                $mStatusColors = ['paye' => 'bg-emerald-400/20 text-emerald-300 ring-emerald-400/30', 'impaye' => 'bg-red-400/20 text-red-300 ring-red-400/30', 'partiel' => 'bg-amber-400/20 text-amber-300 ring-amber-400/30', 'en_retard' => 'bg-red-400/20 text-red-300 ring-red-400/30', 'a_venir' => 'bg-blue-400/20 text-blue-300 ring-blue-400/30'];
+                $mDotColors = ['paye' => 'bg-emerald-400', 'impaye' => 'bg-red-400', 'partiel' => 'bg-amber-400', 'en_retard' => 'bg-red-400', 'a_venir' => 'bg-blue-400'];
+                $mLabels = ['paye' => 'Paye', 'impaye' => 'Impaye', 'partiel' => 'Partiel', 'en_retard' => 'En retard', 'a_venir' => 'A venir'];
             @endphp
             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ring-1 {{ $mStatusColors[$monthly->status] ?? '' }}">
                 <span class="w-1.5 h-1.5 rounded-full mr-1.5 {{ $mDotColors[$monthly->status] ?? 'bg-gray-400' }}"></span>

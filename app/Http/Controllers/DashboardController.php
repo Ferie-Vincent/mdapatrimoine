@@ -58,6 +58,8 @@ class DashboardController extends Controller
                 'vacant_count'       => $data['vacant_count'],
                 'properties_count'   => $data['properties_count'],
                 'active_leases_count'=> $data['active_leases_count'],
+                'total_upcoming'     => $data['total_upcoming'],
+                'upcoming_count'     => $data['upcoming_count'],
             ],
             'monthStats' => [
                 'expected'      => $data['month_expected'],

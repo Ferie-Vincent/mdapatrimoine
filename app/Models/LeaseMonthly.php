@@ -94,4 +94,9 @@ class LeaseMonthly extends Model
     {
         return $query->where('status', 'en_retard');
     }
+
+    public function scopeUpcoming(Builder $query): Builder
+    {
+        return $query->where('status', 'a_venir');
+    }
 }

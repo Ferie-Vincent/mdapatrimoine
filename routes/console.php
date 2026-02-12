@@ -36,6 +36,18 @@ Schedule::call(function () {
 // Expire leases past their end date daily at 01:30
 Schedule::command('leases:expire')->dailyAt('01:30');
 
+// Transition 'a_venir' to 'impaye' when due_date is reached (daily at 00:00)
+Schedule::call(function () {
+    $updated = DB::table('lease_monthlies')
+        ->where('status', 'a_venir')
+        ->where('due_date', '<=', Carbon::today())
+        ->update(['status' => 'impaye']);
+
+    if ($updated > 0) {
+        Log::info("Transitioned {$updated} lease monthlies from 'a_venir' to 'impaye'.");
+    }
+})->dailyAt('00:00');
+
 // Update overdue status daily at 00:30
 Schedule::call(function () {
     $updated = DB::table('lease_monthlies')

@@ -61,6 +61,9 @@ class MonthlyGenerationService
                 $day = min($dueDay, $maxDay);
                 $dueDate = Carbon::create($current->year, $current->month, $day)->toDateString();
 
+                // Future months get 'a_venir', past/current get 'impaye'
+                $status = Carbon::parse($dueDate)->greaterThan(Carbon::today()) ? 'a_venir' : 'impaye';
+
                 $monthly = LeaseMonthly::create([
                     'lease_id'         => $lease->id,
                     'sci_id'           => $lease->sci_id,
@@ -71,7 +74,7 @@ class MonthlyGenerationService
                     'total_due'        => $totalDue,
                     'paid_amount'      => 0,
                     'remaining_amount' => $totalDue,
-                    'status'           => 'impaye',
+                    'status'           => $status,
                     'due_date'         => $dueDate,
                 ]);
 

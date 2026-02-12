@@ -52,7 +52,7 @@ class MonthliesExport implements FromQuery, WithHeadings, WithMapping, WithStyle
             number_format((float) $monthly->total_due, 0, ',', ' '),
             number_format((float) $monthly->paid_amount, 0, ',', ' '),
             number_format((float) $monthly->remaining_amount, 0, ',', ' '),
-            ucfirst($monthly->status),
+            ['paye' => 'Paye', 'partiel' => 'Partiel', 'impaye' => 'Impaye', 'en_retard' => 'En retard', 'a_venir' => 'A venir'][$monthly->status] ?? ucfirst($monthly->status),
         ];
     }
 
