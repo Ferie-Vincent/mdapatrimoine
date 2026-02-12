@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>RECU D'ENTREE — FRAIS D'AGENCE</title>
+    <title>REÇU — FRAIS D'AGENCE</title>
     <style>
         @page {
             margin: 20mm;
@@ -122,23 +122,6 @@
             border-top: 1px solid #ddd;
             padding-top: 5px;
         }
-        .company-brand {
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .company-brand img {
-            height: 36px;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-        .company-brand-name {
-            font-size: 15px;
-            font-weight: bold;
-            color: #555;
-            vertical-align: middle;
-            letter-spacing: 1px;
-        }
     </style>
 </head>
 <body>
@@ -146,10 +129,6 @@
         <table class="header-table">
             <tr>
                 <td style="width: 60%;">
-                    <div class="company-brand">
-                        <img src="{{ public_path('assets/img/logo-2.jpg') }}" alt="MDA">
-                        <span class="company-brand-name">MDA Patrimoine</span>
-                    </div>
                     <div class="sci-name">{{ $sci->name }}</div>
                     <div class="sci-info">
                         @if($sci->address){{ $sci->address }}<br>@endif
@@ -168,13 +147,14 @@
         </table>
     </div>
 
-    <div class="title">RECU D'ENTREE — FRAIS D'AGENCE</div>
+    <div class="title">RECU</div>
 
     {{-- En-tete locataire --}}
     <div class="info-block">
         <p><span class="info-label">N° DOSSIER :</span> {{ $lease->dossier_number ?? '-' }}</p>
         <p><span class="info-label">LOCATAIRE :</span> {{ $tenant->full_name ?? '-' }}</p>
-        <p><span class="info-label">N° D'APPARTEMENT :</span> {{ $property->apartment_number ?? $property->reference ?? '-' }}</p>
+        <p><span class="info-label">REFERENCE :</span> {{ $property->reference ?? '-' }}</p>
+        <p><span class="info-label">N° D'APPARTEMENT :</span> {{ $property->numero_porte ?? '-' }}</p>
         <p><span class="info-label">ADRESSE :</span> {{ $property->address ?? '-' }}</p>
         <p><span class="info-label">DATE D'ENTREE :</span> {{ $lease->start_date ? \Carbon\Carbon::parse($lease->start_date)->format('d/m/Y') : '-' }}</p>
     </div>
@@ -203,16 +183,31 @@
         Loyer mensuel de reference : {{ $lease->rent_amount ? number_format((float)$lease->rent_amount, 0, ',', ' ') : '-' }} FCFA
     </div>
 
+    @php
+        $methodLabels = [
+            'virement' => 'Virement',
+            'especes' => 'Especes',
+            'cheque' => 'Cheque',
+            'mobile_money' => 'Mobile Money',
+            'versement_especes' => 'Versement especes sur compte',
+            'depot_bancaire' => 'Depot bancaire',
+            'autre' => 'Autre',
+        ];
+    @endphp
+    <div class="loyer-reference">
+        <strong>Mode de reglement :</strong> {{ $methodLabels[$lease->payment_method] ?? ucfirst(str_replace('_', ' ', $lease->payment_method ?? '-')) }}
+    </div>
+
     {{-- Pied --}}
     <div class="signature-section">
         <table class="signature-table">
             <tr>
                 <td>
-                    <strong>SIGNATURE DU LOCATAIRE /PO ET DATE</strong>
+                    <strong>SIGNATURE DU LOCATAIRE</strong>
                     <div class="signature-line">&nbsp;</div>
                 </td>
                 <td>
-                    <strong>CACHET ET SIGNATURE DE L'AGENCE</strong>
+                    <strong>SIGNATURE DE L'AGENCE</strong>
                     <div class="signature-line">&nbsp;</div>
                 </td>
             </tr>
@@ -220,7 +215,7 @@
     </div>
 
     <div class="footer">
-        MDA Patrimoine — {{ $sci->name }} @if($sci->rccm)| RCCM : {{ $sci->rccm }}@endif @if($sci->ifu)| IFU : {{ $sci->ifu }}@endif
+        {{ $sci->name }} @if($sci->rccm)| RCCM : {{ $sci->rccm }}@endif @if($sci->ifu)| IFU : {{ $sci->ifu }}@endif
     </div>
 </body>
 </html>
