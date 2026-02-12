@@ -51,6 +51,26 @@ Route::middleware(['auth', 'verified', SetActiveSci::class])->group(function () 
     // CSRF token refresh (for offline sync replay)
     Route::get('/csrf-token', fn () => response()->json(['token' => csrf_token()]))->name('csrf-token');
 
+    // TEMP: fix existing monthlies with doubled total_due (remove after use)
+    Route::get('/fix-monthlies', function () {
+        $count = 0;
+        \App\Models\LeaseMonthly::where('charges_due', '>', 0)->each(function ($m) use (&$count) {
+            $rentDue = (float) $m->rent_due;
+            $penaltyDue = (float) $m->penalty_due;
+            $paidAmount = (float) $m->paid_amount;
+            $newTotal = $rentDue + $penaltyDue;
+            $newRemaining = max(0, $newTotal - $paidAmount);
+            $m->update([
+                'charges_due' => 0,
+                'total_due' => $newTotal,
+                'remaining_amount' => $newRemaining,
+                'status' => $newRemaining <= 0 ? 'paye' : ($paidAmount > 0 ? 'partiel' : $m->status),
+            ]);
+            $count++;
+        });
+        return response()->json(['fixed' => $count]);
+    });
+
     // Dashboard & SCI switching (all roles)
     Route::post('/switch-sci', [DashboardController::class, 'switchSci'])->name('switch-sci');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
