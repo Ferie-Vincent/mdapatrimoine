@@ -10,118 +10,98 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SSH_USER: u928962285
-      SSH_HOST: 46.202.172.253
-      SSH_PORT: 65002
-      DEPLOY_PATH: /home/u928962285/domains/red-lark-161165.hostingersite.com/public_html
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
 
     steps:
-      # 1) Récupérer le code
-      - name: 📥 Checkout code
+      # 1) Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2) Installer les dépendances PHP SUR GITHUB
-      - name: 🧰 Setup PHP 8.4
+      # 2) PHP + Composer
+      - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           extensions: mbstring, intl, pdo_mysql, bcmath
           coverage: none
 
-      - name: 📦 Composer install (CI)
-        run: |
-          composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+      - name: Composer install
+        run: composer install --no-dev --optimize-autoloader --no-interaction
 
-      # 3) Installer Node + Build Vite SUR GITHUB
-      - name: 🧰 Setup Node
+      # 3) Node + Vite build
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: 📦 NPM install + build
+      - name: NPM install + build
         run: |
           npm ci
           npm run build
 
-      # 4) Préparer SSH (clé en dur TEMPORAIREMENT)
-      - name: 🔐 Setup SSH
+      # 4) SSH
+      - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: |
-            -----BEGIN OPENSSH PRIVATE KEY-----
-            b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-            QyNTUxOQAAACC014PIe4ucT722IX1adFw8mjwoyQFXHHV49VsZ7KRqYwAAAJCtHWqarR1q
-            mgAAAAtzc2gtZWQyNTUxOQAAACC014PIe4ucT722IX1adFw8mjwoyQFXHHV49VsZ7KRqYw
-            AAAECs2d5VZg1wY0UFNDszIFheBnE7kpfAtrvKzMgIpspo47TXg8h7i5xPvbYhfVp0XDya
-            PCjJAVccdXj1WxnspGpjAAAADW1kYXBhdHJpbW9pbmU=
-            -----END OPENSSH PRIVATE KEY-----
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: 🔑 Add server to known_hosts
+      - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-      # 5) Envoyer le projet complet sur Hostinger
-      - name: 📤 Sync code to server (rsync)
+      # 5) Deploy via rsync
+      - name: Sync code to server
         run: |
           set -e
-          echo "👤 SSH_USER=$SSH_USER"
-          echo "🌐 SSH_HOST=$SSH_HOST"
-          echo "🚪 SSH_PORT=$SSH_PORT"
-          echo "📁 DEPLOY_PATH=$DEPLOY_PATH"
-
           RSYNC_SSH="ssh -4 -p $SSH_PORT -o StrictHostKeyChecking=yes -o ConnectTimeout=15"
 
-          echo "🔎 SSH preflight check..."
+          echo "SSH preflight check..."
           if ! $RSYNC_SSH -T "$SSH_USER@$SSH_HOST" 'echo ok'; then
-            echo "❌ SSH connection failed"
+            echo "SSH connection failed"
             exit 1
           fi
 
-          echo "📁 Syncing files..."
+          echo "Syncing files..."
           rsync -az --delete -e "$RSYNC_SSH" \
             --exclude ".git" \
             --exclude ".github" \
             --exclude "tests" \
             --exclude "node_modules" \
             --exclude ".env" \
-            --exclude "storage/app/public/*" \
-            --exclude "storage/app/backups/*" \
+            --exclude "storage/logs" \
+            --exclude "storage/app" \
+            --exclude "storage/framework/sessions" \
+            --exclude "storage/framework/cache" \
             ./ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
 
-      # 6) Lancer les commandes Artisan sur le serveur
-      - name: 🚀 Run Artisan on server
+      # 6) Artisan commands on server
+      - name: Run post-deploy commands
         run: |
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" << 'EOF'
           set -e
+          cd ${{ secrets.DEPLOY_PATH }}
 
-          cd /home/u928962285/domains/red-lark-161165.hostingersite.com/public_html
+          PHP_BIN="/opt/alt/php84/usr/bin/php"
 
-          # Utiliser PHP 8.4 si disponible
-          if [ -x /opt/alt/php84/usr/bin/php ]; then
-            PHP_BIN="/opt/alt/php84/usr/bin/php"
-          else
-            PHP_BIN="php"
-          fi
+          echo "PHP version:"
+          "$PHP_BIN" -v
 
-          echo "👀 PHP utilisé :"
-          "$PHP_BIN" -v || true
+          echo "Fix permissions..."
+          chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 
-          echo "⚙️ Fix permissions..."
-          chmod -R 775 storage bootstrap/cache || true
+          echo "Migrations..."
+          "$PHP_BIN" artisan migrate --force
 
-          echo "⚠️ Artisan commands..."
-          "$PHP_BIN" artisan migrate --force || true
-          "$PHP_BIN" artisan storage:link || true
-          "$PHP_BIN" artisan config:clear || true
-          "$PHP_BIN" artisan cache:clear || true
-          "$PHP_BIN" artisan route:clear || true
-          "$PHP_BIN" artisan view:clear || true
+          echo "Storage link..."
+          "$PHP_BIN" artisan storage:link 2>/dev/null || true
 
-          "$PHP_BIN" artisan config:cache || true
-          "$PHP_BIN" artisan route:cache || true
-          "$PHP_BIN" artisan view:cache || true
-          "$PHP_BIN" artisan optimize || true
+          echo "Optimize..."
+          "$PHP_BIN" artisan optimize:clear
+          "$PHP_BIN" artisan optimize
 
-          echo "🎉 SUCCESS : Déploiement terminé."
+          echo "Deploy complete."
           EOF
