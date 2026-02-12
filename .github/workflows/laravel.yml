@@ -1,0 +1,127 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SSH_USER: u928962285
+      SSH_HOST: 46.202.172.253
+      SSH_PORT: 65002
+      DEPLOY_PATH: /home/u928962285/domains/red-lark-161165.hostingersite.com/public_html
+
+    steps:
+      # 1) Récupérer le code
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # 2) Installer les dépendances PHP SUR GITHUB
+      - name: 🧰 Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, pdo_mysql, bcmath
+          coverage: none
+
+      - name: 📦 Composer install (CI)
+        run: |
+          composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+      # 3) Installer Node + Build Vite SUR GITHUB
+      - name: 🧰 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 NPM install + build
+        run: |
+          npm ci
+          npm run build
+
+      # 4) Préparer SSH (clé en dur TEMPORAIREMENT)
+      - name: 🔐 Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: |
+            -----BEGIN OPENSSH PRIVATE KEY-----
+            b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+            QyNTUxOQAAACC014PIe4ucT722IX1adFw8mjwoyQFXHHV49VsZ7KRqYwAAAJCtHWqarR1q
+            mgAAAAtzc2gtZWQyNTUxOQAAACC014PIe4ucT722IX1adFw8mjwoyQFXHHV49VsZ7KRqYw
+            AAAECs2d5VZg1wY0UFNDszIFheBnE7kpfAtrvKzMgIpspo47TXg8h7i5xPvbYhfVp0XDya
+            PCjJAVccdXj1WxnspGpjAAAADW1kYXBhdHJpbW9pbmU=
+            -----END OPENSSH PRIVATE KEY-----
+
+      - name: 🔑 Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      # 5) Envoyer le projet complet sur Hostinger
+      - name: 📤 Sync code to server (rsync)
+        run: |
+          set -e
+          echo "👤 SSH_USER=$SSH_USER"
+          echo "🌐 SSH_HOST=$SSH_HOST"
+          echo "🚪 SSH_PORT=$SSH_PORT"
+          echo "📁 DEPLOY_PATH=$DEPLOY_PATH"
+
+          RSYNC_SSH="ssh -4 -p $SSH_PORT -o StrictHostKeyChecking=yes -o ConnectTimeout=15"
+
+          echo "🔎 SSH preflight check..."
+          if ! $RSYNC_SSH -T "$SSH_USER@$SSH_HOST" 'echo ok'; then
+            echo "❌ SSH connection failed"
+            exit 1
+          fi
+
+          echo "📁 Syncing files..."
+          rsync -az --delete -e "$RSYNC_SSH" \
+            --exclude ".git" \
+            --exclude ".github" \
+            --exclude "tests" \
+            --exclude "node_modules" \
+            --exclude ".env" \
+            --exclude "storage/app/public/*" \
+            --exclude "storage/app/backups/*" \
+            ./ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+
+      # 6) Lancer les commandes Artisan sur le serveur
+      - name: 🚀 Run Artisan on server
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" << 'EOF'
+          set -e
+
+          cd /home/u928962285/domains/red-lark-161165.hostingersite.com/public_html
+
+          # Utiliser PHP 8.2 si disponible
+          if [ -x /opt/alt/php82/usr/bin/php ]; then
+            PHP_BIN="/opt/alt/php84/usr/bin/php"
+          else
+            PHP_BIN="php"
+          fi
+
+          echo "👀 PHP utilisé :"
+          "$PHP_BIN" -v || true
+
+          echo "⚙️ Fix permissions..."
+          chmod -R 775 storage bootstrap/cache || true
+
+          echo "⚠️ Artisan commands..."
+          "$PHP_BIN" artisan migrate --force || true
+          "$PHP_BIN" artisan storage:link || true
+          "$PHP_BIN" artisan config:clear || true
+          "$PHP_BIN" artisan cache:clear || true
+          "$PHP_BIN" artisan route:clear || true
+          "$PHP_BIN" artisan view:clear || true
+
+          "$PHP_BIN" artisan config:cache || true
+          "$PHP_BIN" artisan route:cache || true
+          "$PHP_BIN" artisan view:cache || true
+          "$PHP_BIN" artisan optimize || true
+
+          echo "🎉 SUCCESS : Déploiement terminé."
+          EOF
