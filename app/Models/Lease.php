@@ -47,6 +47,14 @@ class Lease extends Model
         'deposit_returned_amount',
         'debts_or_credits_note',
         'actual_exit_date',
+        'lease_type',
+        'check_in_date',
+        'check_out_date',
+        'nights_count',
+        'daily_rate',
+        'discount_rate',
+        'discount_amount',
+        'total_amount',
         'notes',
     ];
 
@@ -72,7 +80,20 @@ class Lease extends Model
             'charges_due_amount' => 'decimal:2',
             'deposit_returned_amount' => 'decimal:2',
             'actual_exit_date' => 'date',
+            'check_in_date' => 'date',
+            'check_out_date' => 'date',
+            'nights_count' => 'integer',
+            'daily_rate' => 'decimal:2',
+            'discount_rate' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
+            'total_amount' => 'decimal:2',
+            'entry_inspection_path' => 'array',
         ];
+    }
+
+    public function isMeuble(): bool
+    {
+        return $this->lease_type === 'meuble';
     }
 
     /* ------------------------------------------------------------------ */
@@ -125,5 +146,12 @@ class Lease extends Model
     public function scopeForProperty(Builder $query, int $propertyId): Builder
     {
         return $query->where('property_id', $propertyId);
+    }
+
+    public function scopeExpiringSoon(Builder $query, int $days = 30): Builder
+    {
+        return $query->where('status', 'actif')
+            ->whereNotNull('end_date')
+            ->where('end_date', '<=', \Carbon\Carbon::now()->addDays($days));
     }
 }

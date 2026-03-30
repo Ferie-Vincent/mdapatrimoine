@@ -28,6 +28,8 @@ class StorePropertyRequest extends FormRequest
             'surface'           => ['nullable', 'numeric', 'min:0'],
             'rooms'             => ['nullable', 'integer', 'min:0'],
             'status'            => ['required', 'in:disponible,occupe,travaux'],
+            'rental_category'   => ['required', 'in:non_meuble,meuble'],
+            'daily_rate'        => ['nullable', 'required_if:rental_category,meuble', 'numeric', 'min:0'],
             'niveau'            => ['nullable', 'string', 'max:50'],
             'numero_porte'      => ['nullable', 'string', 'max:50'],
             'nb_keys'           => ['nullable', 'integer'],
@@ -62,6 +64,11 @@ class StorePropertyRequest extends FormRequest
             'rooms.min'                  => 'Le nombre de pièces ne peut pas être négatif.',
             'status.required'            => 'Le statut est obligatoire.',
             'status.in'                  => 'Le statut sélectionné n\'est pas valide.',
+            'rental_category.required'   => 'La catégorie de location est obligatoire.',
+            'rental_category.in'         => 'La catégorie de location n\'est pas valide.',
+            'daily_rate.required_if'     => 'Le tarif journalier est obligatoire pour un bien meublé.',
+            'daily_rate.numeric'         => 'Le tarif journalier doit être un nombre.',
+            'daily_rate.min'             => 'Le tarif journalier ne peut pas être négatif.',
         ];
     }
 }

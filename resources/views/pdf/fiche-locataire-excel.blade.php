@@ -78,10 +78,6 @@
 </head>
 <body>
     <div class="header">
-        <div class="company-brand" style="text-align: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0;">
-            <img src="{{ public_path('assets/img/logo-2.jpg') }}" alt="MDA" style="height: 36px; vertical-align: middle; margin-right: 8px;">
-            <span style="font-size: 15px; font-weight: bold; color: #555; vertical-align: middle; letter-spacing: 1px;">MDA Patrimoine</span>
-        </div>
         <h1>FICHE LOCATAIRE POUR CONTRAT DE BAIL A USAGE D'HABITATION</h1>
         <div class="sci-name">{{ $sci->name }}</div>
     </div>
@@ -204,7 +200,7 @@
     </table>
 
     <div class="footer">
-        MDA Patrimoine — {{ $sci->name }} @if($sci->rccm)| RCCM : {{ $sci->rccm }}@endif @if($sci->ifu)| IFU : {{ $sci->ifu }}@endif
+        {{ $sci->name }} @if($sci->rccm)| RCCM : {{ $sci->rccm }}@endif @if($sci->ifu)| IFU : {{ $sci->ifu }}@endif
         | G&eacute;n&eacute;r&eacute; le {{ \Carbon\Carbon::now()->format('d/m/Y H:i') }}
     </div>
 </body>

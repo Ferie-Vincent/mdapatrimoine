@@ -2,15 +2,15 @@
 <div class="space-y-6">
     {{-- Informations generales --}}
     <div>
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">INFORMATIONS GÉNÉRALES</p>
+        <p class="text-xs font-semibold text-on-surface-faint uppercase tracking-wider mb-4">INFORMATIONS GÉNÉRALES</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">SCI</label>
+                <label class="block text-sm font-medium text-on-surface-secondary">SCI</label>
                 @if($activeSci ?? null)
-                    <p class="mt-1 text-sm font-semibold text-gray-900">{{ $activeSci->name }}</p>
+                    <p class="mt-1 text-sm font-semibold text-on-surface">{{ $activeSci->name }}</p>
                     <input type="hidden" name="sci_id" value="{{ $activeSci->id }}">
                 @else
-                    <select name="sci_id" required class="mt-1.5 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                    <select name="sci_id" required class="mt-1.5 h-11 w-full appearance-none rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                         <option value="">-- Selectionner une SCI --</option>
                         @foreach(\App\Models\Sci::all() as $sci)
                             <option value="{{ $sci->id }}" {{ ($p->sci_id ?? '') == $sci->id ? 'selected' : '' }}>{{ $sci->name }}</option>
@@ -20,13 +20,13 @@
                 <template x-if="errors.sci_id"><p class="mt-1 text-sm text-red-600" x-text="errors.sci_id[0]"></p></template>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Reference</label>
-                <input type="text" name="reference" value="{{ $p->reference ?? '' }}" class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">Reference</label>
+                <input type="text" name="reference" value="{{ $p->reference ?? '' }}" class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                 <template x-if="errors.reference"><p class="mt-1 text-sm text-red-600" x-text="errors.reference[0]"></p></template>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Type</label>
-                <select name="type" class="mt-1.5 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">Type</label>
+                <select name="type" class="mt-1.5 h-11 w-full appearance-none rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                     <option value="">-- Selectionner --</option>
                     @foreach(['appartement','maison','studio','bureau','boutique','entrepot','terrain','autre'] as $t)
                         <option value="{{ $t }}" {{ ($p->type ?? '') === $t ? 'selected' : '' }}>{{ ucfirst($t) }}</option>
@@ -35,18 +35,18 @@
                 <template x-if="errors.type"><p class="mt-1 text-sm text-red-600" x-text="errors.type[0]"></p></template>
             </div>
             <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700">Adresse</label>
-                <textarea name="address" rows="2" class="mt-1.5 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">{{ $p->address ?? '' }}</textarea>
+                <label class="block text-sm font-medium text-on-surface-secondary">Adresse</label>
+                <textarea name="address" rows="2" class="mt-1.5 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">{{ $p->address ?? '' }}</textarea>
                 <template x-if="errors.address"><p class="mt-1 text-sm text-red-600" x-text="errors.address[0]"></p></template>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Ville</label>
-                <input type="text" name="city" value="{{ $p->city ?? '' }}" class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">Ville</label>
+                <input type="text" name="city" value="{{ $p->city ?? '' }}" class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                 <template x-if="errors.city"><p class="mt-1 text-sm text-red-600" x-text="errors.city[0]"></p></template>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Statut</label>
-                <select name="status" class="mt-1.5 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">Statut</label>
+                <select name="status" class="mt-1.5 h-11 w-full appearance-none rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                     <option value="">-- Selectionner --</option>
                     <option value="disponible" {{ ($p->status ?? '') === 'disponible' ? 'selected' : '' }}>Disponible</option>
                     <option value="occupe" {{ ($p->status ?? '') === 'occupe' ? 'selected' : '' }}>Occupe</option>
@@ -57,74 +57,95 @@
         </div>
     </div>
 
+    {{-- Categorie de location --}}
+    <div class="border-t border-theme-subtle pt-5 mt-5" x-data="{ rentalCategory: '{{ $p->rental_category ?? 'non_meuble' }}' }">
+        <p class="text-xs font-semibold text-on-surface-faint uppercase tracking-wider mb-4">CATÉGORIE DE LOCATION</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-on-surface-secondary">Catégorie</label>
+                <select name="rental_category" x-model="rentalCategory" class="mt-1.5 h-11 w-full appearance-none rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                    <option value="non_meuble">Non meublé</option>
+                    <option value="meuble">Meublé</option>
+                </select>
+                <template x-if="errors.rental_category"><p class="mt-1 text-sm text-red-600" x-text="errors.rental_category[0]"></p></template>
+            </div>
+            <div x-show="rentalCategory === 'meuble'" x-transition>
+                <label class="block text-sm font-medium text-on-surface-secondary">Tarif par 24h (FCFA)</label>
+                <input type="number" step="1" min="0" name="daily_rate" value="{{ $p->daily_rate ?? '' }}" placeholder="Ex: 25000"
+                       class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <template x-if="errors.daily_rate"><p class="mt-1 text-sm text-red-600" x-text="errors.daily_rate[0]"></p></template>
+            </div>
+        </div>
+    </div>
+
     {{-- Caracteristiques --}}
-    <div class="border-t border-gray-100 pt-5 mt-5">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">CARACTÉRISTIQUES</p>
+    <div class="border-t border-theme-subtle pt-5 mt-5">
+        <p class="text-xs font-semibold text-on-surface-faint uppercase tracking-wider mb-4">CARACTÉRISTIQUES</p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">Surface (m2)</label>
-                <input type="number" step="0.01" name="surface" value="{{ $p->surface ?? '' }}" class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">Surface (m2)</label>
+                <input type="number" step="0.01" name="surface" value="{{ $p->surface ?? '' }}" class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                 <template x-if="errors.surface"><p class="mt-1 text-sm text-red-600" x-text="errors.surface[0]"></p></template>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Nombre de pieces</label>
-                <input type="number" name="rooms" value="{{ $p->rooms ?? '' }}" min="0" class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">Nombre de pieces</label>
+                <input type="number" name="rooms" value="{{ $p->rooms ?? '' }}" min="0" class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                 <template x-if="errors.rooms"><p class="mt-1 text-sm text-red-600" x-text="errors.rooms[0]"></p></template>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Nombre de cles</label>
-                <input type="number" name="nb_keys" value="{{ $p->nb_keys ?? '' }}" min="0" class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">Nombre de cles</label>
+                <input type="number" name="nb_keys" value="{{ $p->nb_keys ?? '' }}" min="0" class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Nombre de climatiseurs</label>
-                <input type="number" name="nb_clim" value="{{ $p->nb_clim ?? '' }}" min="0" class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">Nombre de climatiseurs</label>
+                <input type="number" name="nb_clim" value="{{ $p->nb_clim ?? '' }}" min="0" class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Niveau / Etage</label>
-                <input type="text" name="niveau" value="{{ $p->niveau ?? '' }}" placeholder="Ex: RDC, 1er, 2e..." class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">Niveau / Etage</label>
+                <input type="text" name="niveau" value="{{ $p->niveau ?? '' }}" placeholder="Ex: RDC, 1er, 2e..." class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                 <template x-if="errors.niveau"><p class="mt-1 text-sm text-red-600" x-text="errors.niveau[0]"></p></template>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">N° Appartement</label>
-                <input type="text" name="numero_porte" value="{{ $p->numero_porte ?? '' }}" placeholder="Ex: A12, 203..." class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                <label class="block text-sm font-medium text-on-surface-secondary">N° Appartement</label>
+                <input type="text" name="numero_porte" value="{{ $p->numero_porte ?? '' }}" placeholder="Ex: A12, 203..." class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                 <template x-if="errors.numero_porte"><p class="mt-1 text-sm text-red-600" x-text="errors.numero_porte[0]"></p></template>
             </div>
         </div>
     </div>
 
     {{-- Localisation sur carte --}}
-    <div class="border-t border-gray-100 pt-5 mt-5" x-data="propertyMap({{ json_encode($p->latitude ?? null) }}, {{ json_encode($p->longitude ?? null) }}, '{{ $p ? 'edit-'.$p->id : 'create' }}')" x-init="initMap()">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">LOCALISATION</p>
-        <p class="text-xs text-gray-500 mb-2">Cliquez sur la carte ou deplacez le marqueur pour positionner le bien avec precision.</p>
+    <div class="border-t border-theme-subtle pt-5 mt-5" x-data="propertyMap({{ json_encode($p->latitude ?? null) }}, {{ json_encode($p->longitude ?? null) }}, '{{ $p ? 'edit-'.$p->id : 'create' }}')" x-init="initMap()">
+        <p class="text-xs font-semibold text-on-surface-faint uppercase tracking-wider mb-4">LOCALISATION</p>
+        <p class="text-xs text-on-surface-muted mb-2">Cliquez sur la carte ou deplacez le marqueur pour positionner le bien avec precision.</p>
 
         {{-- Search bar --}}
         <div class="relative mb-3">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-faint">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </span>
             <input type="text" x-ref="searchInput"
                    @keydown.enter.prevent="searchAddress()"
                    placeholder="Rechercher une adresse..."
-                   class="block w-full pl-9 pr-24 py-2 rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
-            <button type="button" @click="searchAddress()" class="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-brand-700 hover:text-brand-900">
+                   class="block w-full pl-9 pr-24 py-2 rounded-lg border border-theme bg-transparent text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+            <button type="button" @click="searchAddress()" class="absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-brand-700 hover:text-brand-900 dark:hover:text-brand-300">
                 Rechercher
             </button>
         </div>
 
         {{-- Map container --}}
-        <div x-ref="mapContainer" style="height: 300px; position: relative; z-index: 0;" class="rounded-lg border border-gray-200 overflow-hidden"></div>
+        <div x-ref="mapContainer" style="height: 300px; position: relative; z-index: 0;" class="rounded-lg border border-theme overflow-hidden"></div>
 
         {{-- Buttons --}}
         <div class="mt-3 flex flex-wrap gap-2">
             <button type="button" @click="geolocate()"
                     :disabled="geoLoading"
-                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition disabled:opacity-50">
+                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-brand-700 bg-brand-50 dark:bg-brand-950/30 border border-brand-200 dark:border-gray-600 rounded-lg hover:bg-brand-100 dark:hover:bg-brand-800/40 dark:bg-brand-900/40 transition disabled:opacity-50">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span x-text="geoLoading ? 'Localisation...' : 'Ma position'"></span>
             </button>
             <button type="button" @click="clearPosition()"
                     x-show="lat !== null"
-                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition">
+                    class="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/30 rounded-lg hover:bg-red-100 dark:hover:bg-red-800/40 dark:bg-red-900/40 transition">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 Effacer
             </button>
@@ -132,7 +153,7 @@
         <p x-show="geoError" x-text="geoError" class="mt-1 text-sm text-red-600"></p>
 
         {{-- Coordinates display --}}
-        <div x-show="lat !== null" class="mt-2 text-xs text-gray-500">
+        <div x-show="lat !== null" class="mt-2 text-xs text-on-surface-muted">
             Coordonnees : <span x-text="lat ? lat.toFixed(7) : ''"></span>, <span x-text="lng ? lng.toFixed(7) : ''"></span>
         </div>
 
@@ -144,27 +165,27 @@
     </div>
 
     {{-- Compteurs --}}
-    <div class="border-t border-gray-100 pt-5 mt-5">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">COMPTEURS</p>
+    <div class="border-t border-theme-subtle pt-5 mt-5">
+        <p class="text-xs font-semibold text-on-surface-faint uppercase tracking-wider mb-4">COMPTEURS</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">Compteur CIE</label>
+                <label class="block text-sm font-medium text-on-surface-secondary">Compteur CIE</label>
                 <input type="text" name="cie_meter_number" value="{{ $p->cie_meter_number ?? '' }}" placeholder="N° compteur CIE"
-                       class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                       class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                 <template x-if="errors.cie_meter_number"><p class="mt-1 text-sm text-red-600" x-text="errors.cie_meter_number[0]"></p></template>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Compteur SODECI</label>
+                <label class="block text-sm font-medium text-on-surface-secondary">Compteur SODECI</label>
                 <input type="text" name="sodeci_meter_number" value="{{ $p->sodeci_meter_number ?? '' }}" placeholder="N° compteur SODECI"
-                       class="mt-1.5 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
+                       class="mt-1.5 h-11 w-full rounded-lg border border-theme bg-transparent px-4 py-2.5 text-sm text-on-surface focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 focus:outline-hidden">
                 <template x-if="errors.sodeci_meter_number"><p class="mt-1 text-sm text-red-600" x-text="errors.sodeci_meter_number[0]"></p></template>
             </div>
         </div>
     </div>
 
     {{-- Photos --}}
-    <div class="border-t border-gray-100 pt-5 mt-5">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">PHOTOS</p>
+    <div class="border-t border-theme-subtle pt-5 mt-5">
+        <p class="text-xs font-semibold text-on-surface-faint uppercase tracking-wider mb-4">PHOTOS</p>
         <x-multi-photo-upload :existing="$p->photos ?? []" />
     </div>
 </div>

@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900">Bon retour</h2>
-        <p class="mt-1.5 text-sm text-gray-500">Saisissez vos identifiants pour acceder a votre espace.</p>
+        <h2 class="text-2xl font-bold text-on-surface">Bon retour</h2>
+        <p class="mt-1.5 text-sm text-on-surface-muted">Saisissez vos identifiants pour acceder a votre espace.</p>
     </div>
 
     <!-- Session Status -->
@@ -12,14 +12,14 @@
 
         <!-- Email Address -->
         <div>
-            <label for="email" class="mb-1.5 block text-sm font-medium text-gray-700">Adresse email</label>
+            <label for="email" class="mb-1.5 block text-sm font-medium text-on-surface-secondary">Adresse email</label>
             <x-text-input id="email" class="block w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="votre@email.com" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         <!-- Password -->
         <div x-data="{ show: false }">
-            <label for="password" class="mb-1.5 block text-sm font-medium text-gray-700">Mot de passe</label>
+            <label for="password" class="mb-1.5 block text-sm font-medium text-on-surface-secondary">Mot de passe</label>
             <div class="relative">
                 <x-text-input
                     id="password"
@@ -30,7 +30,7 @@
                     autocomplete="current-password"
                     placeholder="••••••••"
                 />
-                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition">
+                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 flex items-center pr-3 text-on-surface-faint hover:text-on-surface-secondary transition">
                     <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -46,12 +46,12 @@
         <!-- Remember Me & Forgot -->
         <div class="flex items-center justify-between">
             <label for="remember_me" class="inline-flex items-center cursor-pointer">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">Se souvenir de moi</span>
+                <input id="remember_me" type="checkbox" class="rounded border-theme text-brand-600 dark:text-brand-400 shadow-sm focus:ring-brand-500" name="remember">
+                <span class="ms-2 text-sm text-on-surface-secondary">Se souvenir de moi</span>
             </label>
 
             @if (Route::has('password.request'))
-                <a class="text-sm text-brand-600 hover:text-brand-700 font-medium transition" href="{{ route('password.request') }}">
+                <a class="text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-medium transition" href="{{ route('password.request') }}">
                     Mot de passe oublie ?
                 </a>
             @endif

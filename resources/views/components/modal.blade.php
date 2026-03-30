@@ -62,13 +62,13 @@ $maxWidthClass = [
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
     >
-        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        <div class="absolute inset-0 bg-black/50"></div>
     </div>
 
     {{-- Modal card --}}
     <div
         x-show="show"
-        class="mb-6 bg-white rounded-2xl overflow-hidden shadow-xl transform transition-all sm:w-full {{ $maxWidthClass }} sm:mx-auto max-h-[90vh] flex flex-col"
+        class="mb-6 bg-surface rounded-2xl overflow-hidden shadow-xl transform transition-all sm:w-full {{ $maxWidthClass }} sm:mx-auto max-h-[90vh] flex flex-col"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -78,9 +78,9 @@ $maxWidthClass = [
     >
         {{-- Header with title and close button --}}
         @if($title)
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
-                <h3 class="text-lg font-semibold text-gray-800">{{ $title }}</h3>
-                <button @click="show = false" class="text-gray-400 hover:text-gray-600 transition">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-theme shrink-0">
+                <h3 class="text-lg font-semibold text-on-surface">{{ $title }}</h3>
+                <button @click="show = false" class="text-on-surface-faint hover:text-on-surface-secondary transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>

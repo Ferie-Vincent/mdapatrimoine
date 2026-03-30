@@ -10,9 +10,9 @@
 
 @php
 $trendColor = match($trend ?? '') {
-    'up'   => 'text-accent-green-400 bg-accent-green-50',
-    'down' => 'text-accent-red-400 bg-accent-red-50',
-    default => 'text-gray-400 bg-gray-50',
+    'up'   => 'text-accent-green-400 bg-accent-green-50 dark:bg-accent-green-900/40',
+    'down' => 'text-accent-red-400 bg-accent-red-50 dark:bg-accent-red-900/40',
+    default => 'text-on-surface-faint bg-surface-hover',
 };
 
 $iconBg = match($color) {
@@ -45,7 +45,7 @@ $defaultIcons = [
 $iconSvg = $icon ?? ($defaultIcons[$color] ?? $defaultIcons['blue']);
 @endphp
 
-<div {{ $attributes->merge(['class' => 'bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow duration-200 relative overflow-hidden']) }}>
+<div {{ $attributes->merge(['class' => 'bg-surface rounded-2xl border border-theme-subtle p-5 hover:shadow-md transition-shadow duration-200 relative overflow-hidden']) }}>
     {{-- Decorative colored blob top-right --}}
     <div class="absolute -top-5 -right-5 w-20 h-20 rounded-full pointer-events-none" style="background: {{ $blobColor }}; opacity: 0.08;"></div>
 
@@ -59,9 +59,9 @@ $iconSvg = $icon ?? ($defaultIcons[$color] ?? $defaultIcons['blue']);
 
         {{-- Content --}}
         <div class="flex-1 min-w-0">
-            <p class="text-sm text-gray-500 mb-1">{{ $title }}</p>
+            <p class="text-sm text-on-surface-muted mb-1">{{ $title }}</p>
             <div class="flex items-end justify-between gap-2">
-                <p class="text-xl font-bold text-gray-900 tracking-tight truncate">{{ $value }}</p>
+                <p class="text-xl font-bold text-on-surface tracking-tight truncate">{{ $value }}</p>
                 @if($trend && $trendValue)
                     <span class="inline-flex items-center gap-0.5 text-xs font-medium px-2 py-0.5 rounded-full {{ $trendColor }} shrink-0">
                         @if($trend === 'up')
@@ -74,7 +74,7 @@ $iconSvg = $icon ?? ($defaultIcons[$color] ?? $defaultIcons['blue']);
                 @endif
             </div>
             @if($subtitle)
-                <p class="text-xs text-gray-400 mt-1 truncate">{{ $subtitle }}</p>
+                <p class="text-xs text-on-surface-faint mt-1 truncate">{{ $subtitle }}</p>
             @endif
         </div>
     </div>

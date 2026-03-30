@@ -34,6 +34,8 @@ class Property extends Model
         'cie_meter_number',
         'sodeci_meter_number',
         'photos',
+        'rental_category',
+        'daily_rate',
         'latitude',
         'longitude',
     ];
@@ -47,6 +49,7 @@ class Property extends Model
             'rooms' => 'integer',
             'nb_keys' => 'integer',
             'nb_clim' => 'integer',
+            'daily_rate' => 'decimal:2',
             'photos' => 'array',
         ];
     }
@@ -72,6 +75,11 @@ class Property extends Model
     public function scopeSci(Builder $query, int $sciId): Builder
     {
         return $query->where('sci_id', $sciId);
+    }
+
+    public function isMeuble(): bool
+    {
+        return $this->rental_category === 'meuble';
     }
 
     public function scopeVisibleByUser(Builder $query, User $user): Builder

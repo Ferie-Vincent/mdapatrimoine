@@ -80,23 +80,6 @@
             border-top: 1px solid #ddd;
             padding-top: 5px;
         }
-        .company-brand {
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .company-brand img {
-            height: 36px;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-        .company-brand-name {
-            font-size: 15px;
-            font-weight: bold;
-            color: #555;
-            vertical-align: middle;
-            letter-spacing: 1px;
-        }
     </style>
 </head>
 <body>
@@ -114,10 +97,6 @@
         <table class="header-table">
             <tr>
                 <td style="width: 60%;">
-                    <div class="company-brand">
-                        <img src="{{ public_path('assets/img/logo-2.jpg') }}" alt="MDA">
-                        <span class="company-brand-name">MDA Patrimoine</span>
-                    </div>
                     <div class="sci-name">{{ $sci->name }}</div>
                     <div class="sci-info">
                         @if($sci->address){{ $sci->address }}<br>@endif
@@ -195,7 +174,7 @@
     </div>
 
     <div class="footer">
-        MDA Patrimoine — {{ $sci->name }} @if($sci->rccm)| RCCM : {{ $sci->rccm }}@endif @if($sci->ifu)| IFU : {{ $sci->ifu }}@endif
+        {{ $sci->name }} @if($sci->rccm)| RCCM : {{ $sci->rccm }}@endif @if($sci->ifu)| IFU : {{ $sci->ifu }}@endif
     </div>
 </body>
 </html>

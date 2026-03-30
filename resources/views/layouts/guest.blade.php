@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" :class="{ 'dark': dark }" x-data="themeManager()">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,13 +9,18 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=outfit:300,400,500,600,700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=nunito:300,400,500,600,700&display=swap" rel="stylesheet" />
+
+        <!-- Anti-FOSC: apply dark class before paint -->
+        <script>
+            (function(){var d=localStorage.getItem('theme');if(d==='dark'||(d!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');})();
+        </script>
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <style>
-            body { font-family: 'Outfit', sans-serif; }
+            body { font-family: 'Nunito', sans-serif; }
 
             @keyframes fadeInUp {
                 from { opacity: 0; transform: translateY(20px); }
@@ -35,17 +40,17 @@
             }
         </style>
     </head>
-    <body class="antialiased text-gray-900">
+    <body class="antialiased text-on-surface">
         <div class="min-h-screen flex">
             {{-- Left side — form --}}
-            <div class="w-full lg:w-1/2 flex flex-col justify-between px-6 sm:px-12 lg:px-16 xl:px-24 py-8 bg-gray-100">
+            <div class="w-full lg:w-1/2 flex flex-col justify-between px-6 sm:px-12 lg:px-16 xl:px-24 py-8 bg-surface-alt">
                 {{-- Logo --}}
                 <div class="animate-fade-in-up">
                     <a href="/" class="inline-flex items-center gap-3">
                         <img src="{{ asset('assets/img/logo.jpg') }}" alt="MDA-Patrimoine" width="60%">
                         {{-- <div>
-                            <span class="text-lg font-bold text-gray-900 tracking-tight leading-tight block">MDA-Patrimoine</span>
-                            <span class="text-xs text-gray-500">Gestion immobiliere</span>
+                            <span class="text-lg font-bold text-on-surface tracking-tight leading-tight block">MDA-Patrimoine</span>
+                            <span class="text-xs text-on-surface-muted">Gestion immobiliere</span>
                         </div> --}}
                     </a>
                 </div>
@@ -56,7 +61,7 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="text-xs text-gray-400 animate-fade-in-up-delay-2">
+                <div class="text-xs text-on-surface-faint animate-fade-in-up-delay-2">
                     &copy; {{ date('Y') }} MDA-Patrimoine. Tous droits reserves.
                 </div>
             </div>

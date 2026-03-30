@@ -1,28 +1,34 @@
 <?php
 
+use App\Http\Controllers\AttestationController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DossierCardController;
 use App\Http\Controllers\ExcelDatabaseController;
 use App\Http\Controllers\ExportController;
-use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\FinancialCurrentController;
+use App\Http\Controllers\FixedChargeController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\MonthlyExcelViewController;
 use App\Http\Controllers\LeaseController;
 use App\Http\Controllers\LeaseMonthlyController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\ProviderContractController;
+use App\Http\Controllers\ProvisionController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\SciController;
-use App\Http\Controllers\TenantController;
-use App\Http\Controllers\ServiceProviderController;
-use App\Http\Controllers\StaffController;
-use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\ProviderContractController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\ServiceProviderController;
+use App\Http\Controllers\TaskController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\TenantController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\SetActiveSci;
 use Illuminate\Support\Facades\Route;
@@ -134,15 +140,15 @@ Route::middleware(['auth', 'verified', SetActiveSci::class])->group(function () 
         Route::get('/audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
 
         // Point Financier Courant (write)
-        Route::post('/financial-current/provisions', [FinancialCurrentController::class, 'storeProvision'])->name('financial-current.store-provision');
-        Route::delete('/financial-current/provisions/{provision}', [FinancialCurrentController::class, 'destroyProvision'])->name('financial-current.destroy-provision');
-        Route::post('/financial-current/purchases', [FinancialCurrentController::class, 'storePurchase'])->name('financial-current.store-purchase');
-        Route::delete('/financial-current/purchases/{purchase}', [FinancialCurrentController::class, 'destroyPurchase'])->name('financial-current.destroy-purchase');
+        Route::post('/financial-current/provisions', [ProvisionController::class, 'store'])->name('financial-current.store-provision');
+        Route::delete('/financial-current/provisions/{provision}', [ProvisionController::class, 'destroy'])->name('financial-current.destroy-provision');
+        Route::post('/financial-current/purchases', [PurchaseController::class, 'store'])->name('financial-current.store-purchase');
+        Route::delete('/financial-current/purchases/{purchase}', [PurchaseController::class, 'destroy'])->name('financial-current.destroy-purchase');
         Route::post('/financial-current/budgets', [FinancialCurrentController::class, 'storeBudget'])->name('financial-current.store-budget');
-        Route::post('/financial-current/fixed-charges', [FinancialCurrentController::class, 'storeFixedCharge'])->name('financial-current.store-fixed-charge');
-        Route::delete('/financial-current/fixed-charges/{fixedCharge}', [FinancialCurrentController::class, 'destroyFixedCharge'])->name('financial-current.destroy-fixed-charge');
-        Route::get('/financial-current/attestation/{type}/{id}', [FinancialCurrentController::class, 'showAttestation'])->name('financial-current.attestation');
-        Route::post('/financial-current/attestation/{type}/{id}/signature', [FinancialCurrentController::class, 'saveSignature'])->name('financial-current.save-signature');
+        Route::post('/financial-current/fixed-charges', [FixedChargeController::class, 'store'])->name('financial-current.store-fixed-charge');
+        Route::delete('/financial-current/fixed-charges/{fixedCharge}', [FixedChargeController::class, 'destroy'])->name('financial-current.destroy-fixed-charge');
+        Route::get('/financial-current/attestation/{type}/{id}', [AttestationController::class, 'show'])->name('financial-current.attestation');
+        Route::post('/financial-current/attestation/{type}/{id}/signature', [AttestationController::class, 'saveSignature'])->name('financial-current.save-signature');
 
         // PDF Excel-style generation
         Route::post('/documents/generate-fiche-locataire', [DocumentController::class, 'generateFicheLocataire'])->name('documents.generate-fiche-locataire');
@@ -166,6 +172,33 @@ Route::middleware(['auth', 'verified', SetActiveSci::class])->group(function () 
         Route::post('/staff/payrolls', [StaffController::class, 'storePayroll'])->name('staff.store-payroll');
         Route::delete('/staff/payrolls/{payroll}', [StaffController::class, 'destroyPayroll'])->name('staff.destroy-payroll');
     });
+
+    /*
+    |----------------------------------------------------------------------
+    | Tasks (Kanban "Ma Journée")
+    |----------------------------------------------------------------------
+    */
+    // Tasks — lecture (tous les utilisateurs authentifiés)
+    Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
+
+    // Tasks — écriture (super_admin + gestionnaire)
+    Route::middleware('role:super_admin,gestionnaire')->group(function () {
+        Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
+        Route::put('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
+        Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+        Route::patch('/tasks/{task}/move', [TaskController::class, 'move'])->name('tasks.move');
+        Route::post('/tasks/reorder', [TaskController::class, 'reorder'])->name('tasks.reorder');
+        Route::post('/tasks/generate-auto', [TaskController::class, 'generateAuto'])->name('tasks.generate-auto');
+    });
+
+    // Tasks — assignation (super_admin uniquement)
+    Route::middleware('role:super_admin')->group(function () {
+        Route::patch('/tasks/{task}/assign', [TaskController::class, 'assign'])->name('tasks.assign');
+    });
+
+    // Push subscriptions
+    Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::delete('/push/unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
 
     /*
     |----------------------------------------------------------------------

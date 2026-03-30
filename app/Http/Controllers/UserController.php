@@ -124,11 +124,14 @@ class UserController extends Controller
             ->with('success', 'Utilisateur mis à jour avec succès.');
     }
 
-    public function destroy(User $user): RedirectResponse
+    public function destroy(User $user): RedirectResponse|JsonResponse
     {
         $this->authorize('delete', $user);
 
         if ($user->id === auth()->id()) {
+            if (request()->wantsJson()) {
+                return response()->json(['message' => 'Vous ne pouvez pas supprimer votre propre compte.'], 422);
+            }
             return redirect()
                 ->route('users.index')
                 ->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
@@ -137,6 +140,10 @@ class UserController extends Controller
         $user->delete();
 
         AuditService::log('deleted', $user);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Utilisateur supprime avec succes.']);
+        }
 
         return redirect()
             ->route('users.index')

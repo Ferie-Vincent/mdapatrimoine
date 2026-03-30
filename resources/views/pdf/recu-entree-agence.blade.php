@@ -188,8 +188,7 @@
             'especes' => 'Especes',
             'cheque' => 'Cheque',
             'mobile_money' => 'Mobile Money',
-            'versement_especes' => 'Versement especes sur compte',
-            'depot_bancaire' => 'Depot bancaire',
+            'depot_bancaire' => 'Dépôt bancaire',
             'autre' => 'Autre',
         ];
     @endphp

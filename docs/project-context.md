@@ -298,12 +298,12 @@ php artisan queue:work # Queue worker
 php artisan schedule:work # Scheduler
 ```
 
-### Comptes de test
+### Comptes de test (DEV/LOCAL UNIQUEMENT — NE PAS UTILISER EN PRODUCTION)
 | Email | Mot de passe | Role |
 |-------|-------------|------|
-| admin@scimanager.com | password | Super Admin |
-| gestionnaire@scimanager.com | password | Gestionnaire |
-| lecteur@scimanager.com | password | Lecture seule |
+| admin@scimanager.com | *(voir seeder)* | Super Admin |
+| gestionnaire@scimanager.com | *(voir seeder)* | Gestionnaire |
+| lecteur@scimanager.com | *(voir seeder)* | Lecture seule |
 
 ### Tests
 ```bash

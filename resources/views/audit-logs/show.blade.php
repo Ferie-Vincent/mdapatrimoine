@@ -3,7 +3,7 @@
 @section('title', 'Log #' . $auditLog->id)
 
 @section('actions')
-    <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm print:hidden">
+    <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-theme rounded-lg text-xs font-medium text-on-surface-secondary hover:bg-surface-hover hover:border-theme transition shadow-sm print:hidden">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
         Imprimer
     </button>
@@ -11,7 +11,7 @@
 
 @section('content')
     <div class="mb-6">
-        <a href="{{ route('audit-logs.index') }}" class="text-sm text-brand-600 hover:text-brand-900">&larr; Retour au journal</a>
+        <a href="{{ route('audit-logs.index') }}" class="text-sm text-brand-600 dark:text-brand-400 hover:text-brand-900 dark:hover:text-brand-300">&larr; Retour au journal</a>
     </div>
 
     @php
@@ -24,40 +24,40 @@
             'recorded_payment' => 'Paiement enregistré',
         ];
         $actionColors = [
-            'created' => 'bg-green-100 text-green-800',
-            'updated' => 'bg-blue-100 text-blue-800',
-            'deleted' => 'bg-red-100 text-red-800',
-            'login' => 'bg-purple-100 text-purple-800',
-            'generated_document' => 'bg-brand-100 text-brand-800',
-            'recorded_payment' => 'bg-emerald-100 text-emerald-800',
+            'created' => 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200',
+            'updated' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200',
+            'deleted' => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200',
+            'login' => 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200',
+            'generated_document' => 'bg-brand-100 dark:bg-brand-900/40 text-brand-800',
+            'recorded_payment' => 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200',
         ];
     @endphp
 
     {{-- Detail card --}}
-    <div class="bg-white rounded-lg shadow mb-6">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-medium text-gray-900">Détails de l'entrée</h3>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $actionColors[$auditLog->action] ?? 'bg-gray-100 text-gray-800' }}">
+    <div class="bg-surface rounded-lg shadow mb-6">
+        <div class="px-6 py-4 border-b border-theme flex items-center justify-between">
+            <h3 class="text-lg font-medium text-on-surface">Détails de l'entrée</h3>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $actionColors[$auditLog->action] ?? 'bg-surface-alt text-on-surface' }}">
                 {{ $actionLabels[$auditLog->action] ?? $auditLog->action }}
             </span>
         </div>
         <div class="p-6">
             <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Utilisateur</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $auditLog->user->name ?? '-' }}</dd>
+                    <dt class="text-sm font-medium text-on-surface-muted">Utilisateur</dt>
+                    <dd class="mt-1 text-sm text-on-surface">{{ $auditLog->user->name ?? '-' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">SCI</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $auditLog->sci->name ?? '-' }}</dd>
+                    <dt class="text-sm font-medium text-on-surface-muted">SCI</dt>
+                    <dd class="mt-1 text-sm text-on-surface">{{ $auditLog->sci->name ?? '-' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Action</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $actionLabels[$auditLog->action] ?? $auditLog->action }}</dd>
+                    <dt class="text-sm font-medium text-on-surface-muted">Action</dt>
+                    <dd class="mt-1 text-sm text-on-surface">{{ $actionLabels[$auditLog->action] ?? $auditLog->action }}</dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Type d'entité</dt>
-                    <dd class="mt-1 text-sm text-gray-900">
+                    <dt class="text-sm font-medium text-on-surface-muted">Type d'entité</dt>
+                    <dd class="mt-1 text-sm text-on-surface">
                         @if($auditLog->entity_type)
                             {{ class_basename($auditLog->entity_type) }}
                         @else
@@ -66,37 +66,37 @@
                     </dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">ID de l'entité</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $auditLog->entity_id ?? '-' }}</dd>
+                    <dt class="text-sm font-medium text-on-surface-muted">ID de l'entité</dt>
+                    <dd class="mt-1 text-sm text-on-surface">{{ $auditLog->entity_id ?? '-' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Adresse IP</dt>
-                    <dd class="mt-1 text-sm font-mono text-gray-900">{{ $auditLog->ip_address ?? '-' }}</dd>
+                    <dt class="text-sm font-medium text-on-surface-muted">Adresse IP</dt>
+                    <dd class="mt-1 text-sm font-mono text-on-surface">{{ $auditLog->ip_address ?? '-' }}</dd>
                 </div>
                 <div class="md:col-span-2">
-                    <dt class="text-sm font-medium text-gray-500">User Agent</dt>
-                    <dd class="mt-1 text-sm text-gray-500 break-all">{{ $auditLog->user_agent ?? '-' }}</dd>
+                    <dt class="text-sm font-medium text-on-surface-muted">User Agent</dt>
+                    <dd class="mt-1 text-sm text-on-surface-muted break-all">{{ $auditLog->user_agent ?? '-' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-sm font-medium text-gray-500">Date / Heure</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ $auditLog->created_at?->format('d/m/Y H:i:s') }}</dd>
+                    <dt class="text-sm font-medium text-on-surface-muted">Date / Heure</dt>
+                    <dd class="mt-1 text-sm text-on-surface">{{ $auditLog->created_at?->format('d/m/Y H:i:s') }}</dd>
                 </div>
             </dl>
         </div>
     </div>
 
     {{-- Changes --}}
-    <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Modifications</h3>
+    <div class="bg-surface rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-theme">
+            <h3 class="text-lg font-medium text-on-surface">Modifications</h3>
         </div>
         <div class="p-6">
             @if($auditLog->changes && count($auditLog->changes))
-                <div class="bg-gray-50 rounded-lg p-4 overflow-x-auto">
-                    <pre class="text-sm text-gray-700 whitespace-pre-wrap font-mono">{{ json_encode($auditLog->changes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                <div class="bg-surface-hover rounded-lg p-4 overflow-x-auto">
+                    <pre class="text-sm text-on-surface-secondary whitespace-pre-wrap font-mono">{{ json_encode($auditLog->changes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                 </div>
             @else
-                <p class="text-sm text-gray-500">Aucune modification enregistrée.</p>
+                <p class="text-sm text-on-surface-muted">Aucune modification enregistrée.</p>
             @endif
         </div>
     </div>

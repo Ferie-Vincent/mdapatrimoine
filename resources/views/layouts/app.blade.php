@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="themeManager()">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'MDA-Patrimoine') - {{ config('app.name', 'MDA-Patrimoine') }}</title>
+
+    {{-- Anti-FOSC: apply dark class before CSS renders --}}
+    <script>
+    (function(){var t=localStorage.getItem('scimanager-theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})();
+    </script>
 
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -14,6 +19,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/assets/img/pwa-192.png">
+    <meta name="vapid-public-key" content="{{ config('webpush.vapid.public_key') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -45,6 +51,26 @@
         .datatable-table th { background: inherit !important; }
         .datatable-table { width: 100% !important; }
 
+        /* Dark mode: DataTable overrides */
+        .dark .datatable-sorter::before,
+        .dark .datatable-sorter::after { border-color: #6b7280 transparent; }
+        .dark .datatable-sorter.asc::before,
+        .dark .datatable-sorter.desc::after { border-color: #60a5fa transparent; }
+
+        /* Dark mode: Leaflet map tiles */
+        .dark .leaflet-tile-pane { filter: brightness(0.7) invert(1) contrast(2.5) hue-rotate(200deg) saturate(0.3) brightness(0.8); }
+        .dark .leaflet-container { background: #1e1e2e; }
+
+        /* Dark mode: form inputs via @tailwindcss/forms */
+        .dark input, .dark textarea, .dark select {
+            background-color: var(--color-input-bg);
+            border-color: var(--color-input-border);
+            color: var(--color-input-text);
+        }
+        .dark input:focus, .dark textarea:focus, .dark select:focus {
+            border-color: #1E3A8A;
+        }
+
         /* Global print styles */
         @media print {
             body { background: white !important; }
@@ -59,7 +85,7 @@
         }
     </style>
 </head>
-<body class="antialiased bg-gray-100" x-data="{ sidebarOpen: true, sidebarMobile: false }">
+<body class="antialiased bg-surface-alt" x-data="{ sidebarOpen: true, sidebarMobile: false }">
     <div class="min-h-screen flex">
 
         {{-- ============================================================ --}}
@@ -207,6 +233,16 @@
                     Personnel & Paie
                 </a>
 
+                <a href="{{ route('tasks.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
+                          {{ request()->routeIs('tasks.*') ? 'bg-white/10 text-white' : 'text-white/60 hover:bg-white/5 hover:text-white' }}">
+                    <svg class="w-5 h-5 shrink-0 {{ request()->routeIs('tasks.*') ? 'text-accent-orange-400' : 'text-white/40' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    Ma Journee
+                </a>
+
                 {{-- Section: Documents --}}
                 <p class="px-3 text-[11px] font-semibold uppercase tracking-wider text-white/40 mt-6 mb-2">Documents</p>
 
@@ -315,24 +351,24 @@
         {{-- ============================================================ --}}
         {{-- MAIN CONTENT --}}
         {{-- ============================================================ --}}
-        <div class="flex-1 lg:ml-[280px] min-h-screen flex flex-col">
+        <div class="flex-1 min-h-screen flex flex-col lg:ml-[280px] lg:w-[calc(100%-280px)]">
 
             {{-- Top bar --}}
-            <header class="sticky top-0 z-20 bg-white border-b border-gray-200 print:hidden"
+            <header class="sticky top-0 z-20 bg-surface border-b border-theme print:hidden"
                     x-data="{ mobileActions: false, mobileSearch: false }">
                 <div class="flex items-center justify-between h-14 sm:h-[72px] px-3 sm:px-6">
                     {{-- Left: hamburger + page title --}}
                     <div class="flex items-center gap-2 sm:gap-4 min-w-0">
                         <button @click="sidebarMobile = !sidebarMobile"
-                                class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 lg:hidden shrink-0">
+                                class="p-2 rounded-lg text-on-surface-muted hover:bg-surface-hover lg:hidden shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                             </svg>
                         </button>
                         <div class="min-w-0">
-                            <h1 class="text-sm sm:text-lg font-semibold text-gray-900 truncate">@yield('title', 'Tableau de bord')</h1>
+                            <h1 class="text-sm sm:text-lg font-semibold text-on-surface truncate">@yield('title', 'Tableau de bord')</h1>
                             @hasSection('breadcrumbs')
-                                <nav class="text-xs text-gray-400 mt-0.5 hidden sm:block">
+                                <nav class="text-xs text-on-surface-faint mt-0.5 hidden sm:block">
                                     @yield('breadcrumbs')
                                 </nav>
                             @endif
@@ -349,7 +385,7 @@
                         {{-- Mobile actions toggle (only if page has actions) --}}
                         @hasSection('actions')
                             <button @click="mobileActions = !mobileActions"
-                                    class="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition">
+                                    class="md:hidden p-2 rounded-lg text-on-surface-muted hover:bg-surface-hover transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                 </svg>
@@ -358,7 +394,7 @@
 
                         {{-- Mobile search toggle --}}
                         <button @click="mobileSearch = !mobileSearch"
-                                class="sm:hidden p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                                class="sm:hidden p-2 rounded-lg text-on-surface-faint hover:bg-surface-hover transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
@@ -367,25 +403,25 @@
                         {{-- Desktop search --}}
                         <div class="relative hidden sm:block" x-data="globalSearch()" @click.away="open = false" @keydown.escape.window="open = false">
                             <div class="relative">
-                                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-faint pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                                 <input type="text" x-model="query" @input.debounce.300ms="search" @focus="if(results.length) open = true"
                                        placeholder="Rechercher..." autocomplete="off"
-                                       class="w-48 lg:w-64 pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition placeholder-gray-400">
+                                       class="w-48 lg:w-64 pl-9 pr-3 py-2 text-sm bg-surface-hover border border-theme rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition placeholder-on-surface-faint">
                             </div>
                             <div x-show="open && (results.length > 0 || (query.length >= 2 && !loading))" x-transition
-                                 class="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto" style="display:none;">
+                                 class="absolute right-0 mt-2 w-80 sm:w-96 bg-surface border border-theme rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto" style="display:none;">
                                 <template x-if="results.length === 0 && query.length >= 2 && !loading">
-                                    <div class="px-4 py-6 text-center text-sm text-gray-400">Aucun resultat</div>
+                                    <div class="px-4 py-6 text-center text-sm text-on-surface-faint">Aucun resultat</div>
                                 </template>
                                 <template x-for="(group, type) in grouped" :key="type">
                                     <div>
-                                        <div class="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 bg-gray-50/80 sticky top-0" x-text="type"></div>
+                                        <div class="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-on-surface-faint bg-surface-hover sticky top-0" x-text="type"></div>
                                         <template x-for="item in group" :key="item.url">
-                                            <a :href="item.url" class="flex items-center gap-3 px-4 py-2.5 hover:bg-brand-50 transition">
+                                            <a :href="item.url" class="flex items-center gap-3 px-4 py-2.5 hover:bg-brand-50 dark:bg-brand-950/30 transition">
                                                 <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                                                     :class="item.icon === 'user' ? 'bg-blue-50 text-blue-500' : (item.icon === 'building' ? 'bg-purple-50 text-purple-500' : (item.icon === 'document' ? 'bg-amber-50 text-amber-500' : 'bg-green-50 text-green-500'))">
+                                                     :class="item.icon === 'user' ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-500' : (item.icon === 'building' ? 'bg-purple-50 dark:bg-purple-950/30 text-purple-500' : (item.icon === 'document' ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-500' : 'bg-green-50 dark:bg-green-950/30 text-green-500'))">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <template x-if="item.icon === 'user'"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></template>
                                                         <template x-if="item.icon === 'building'"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></template>
@@ -394,8 +430,8 @@
                                                     </svg>
                                                 </div>
                                                 <div class="min-w-0">
-                                                    <p class="text-sm font-medium text-gray-900 truncate" x-text="item.label"></p>
-                                                    <p class="text-xs text-gray-400 truncate" x-text="item.sub"></p>
+                                                    <p class="text-sm font-medium text-on-surface truncate" x-text="item.label"></p>
+                                                    <p class="text-xs text-on-surface-faint truncate" x-text="item.sub"></p>
                                                 </div>
                                             </a>
                                         </template>
@@ -408,7 +444,7 @@
                         <div x-data="connectionStatus()" class="relative">
                             <button @click="showDetails = !showDetails"
                                     class="relative p-2 rounded-lg transition"
-                                    :class="online ? 'text-gray-400 hover:bg-gray-100 hover:text-gray-600' : 'text-red-500 hover:bg-red-50 animate-pulse'"
+                                    :class="online ? 'text-on-surface-faint hover:bg-surface-hover hover:text-on-surface-secondary' : 'text-red-500 hover:bg-red-50 dark:bg-red-950/30 animate-pulse'"
                                     :title="online ? 'En ligne' : 'Hors ligne'">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -420,25 +456,25 @@
                             </button>
 
                             <div x-show="showDetails" @click.away="showDetails = false" x-transition
-                                 class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden" style="display:none;">
-                                <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-2" :class="online ? 'bg-green-50' : 'bg-red-50'">
+                                 class="absolute right-0 mt-2 w-80 bg-surface border border-theme rounded-xl shadow-xl z-50 overflow-hidden" style="display:none;">
+                                <div class="px-4 py-3 border-b border-theme-subtle flex items-center gap-2" :class="online ? 'bg-green-50 dark:bg-green-950/30' : 'bg-red-50 dark:bg-red-950/30'">
                                     <div class="w-2.5 h-2.5 rounded-full shrink-0" :class="online ? 'bg-green-500' : 'bg-red-500'"></div>
-                                    <span class="text-sm font-medium" :class="online ? 'text-green-700' : 'text-red-700'" x-text="online ? 'Connecte' : 'Hors ligne'"></span>
+                                    <span class="text-sm font-medium" :class="online ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'" x-text="online ? 'Connecte' : 'Hors ligne'"></span>
                                 </div>
 
                                 <div class="p-4">
                                     <template x-if="totalPending === 0">
-                                        <p class="text-sm text-gray-400 text-center py-2">Aucune donnee en attente de synchronisation</p>
+                                        <p class="text-sm text-on-surface-faint text-center py-2">Aucune donnee en attente de synchronisation</p>
                                     </template>
 
                                     <template x-if="pendingCount > 0">
                                         <div class="mb-3">
-                                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">En attente</p>
+                                            <p class="text-xs font-medium text-on-surface-muted uppercase tracking-wider mb-2">En attente</p>
                                             <template x-for="item in queueItems.filter(i => i.status === 'pending' || i.status === 'syncing')" :key="item.id">
                                                 <div class="flex items-center justify-between py-1.5 text-sm">
                                                     <div class="flex items-center gap-2 min-w-0">
                                                         <div class="w-1.5 h-1.5 rounded-full shrink-0" :class="item.status === 'syncing' ? 'bg-blue-500 animate-pulse' : 'bg-orange-400'"></div>
-                                                        <span class="text-gray-700 truncate" x-text="item.description"></span>
+                                                        <span class="text-on-surface-secondary truncate" x-text="item.description"></span>
                                                     </div>
                                                     <span x-show="item.status === 'syncing'" class="text-xs text-blue-500 shrink-0 ml-2">Envoi...</span>
                                                 </div>
@@ -452,7 +488,7 @@
                                             <template x-for="item in queueItems.filter(i => i.status === 'failed')" :key="item.id">
                                                 <div class="py-1.5">
                                                     <div class="flex items-center justify-between text-sm">
-                                                        <span class="text-gray-700 truncate" x-text="item.description"></span>
+                                                        <span class="text-on-surface-secondary truncate" x-text="item.description"></span>
                                                         <button @click="discardItem(item.id)" class="text-red-400 hover:text-red-600 text-xs shrink-0 ml-2">Supprimer</button>
                                                     </div>
                                                     <p class="text-xs text-red-400 mt-0.5 truncate" x-text="item.lastError"></p>
@@ -461,13 +497,13 @@
                                         </div>
                                     </template>
 
-                                    <div class="flex gap-2 mt-3 pt-3 border-t border-gray-100" x-show="totalPending > 0">
+                                    <div class="flex gap-2 mt-3 pt-3 border-t border-theme-subtle" x-show="totalPending > 0">
                                         <button @click="syncNow()" x-show="online && pendingCount > 0"
                                                 class="flex-1 text-xs font-medium text-white bg-brand-600 hover:bg-brand-700 rounded-lg px-3 py-2 transition">
                                             Synchroniser
                                         </button>
                                         <button @click="retryFailed()" x-show="failedCount > 0"
-                                                class="flex-1 text-xs font-medium text-accent-orange-500 border border-accent-orange-300 hover:bg-orange-50 rounded-lg px-3 py-2 transition">
+                                                class="flex-1 text-xs font-medium text-accent-orange-500 border border-accent-orange-300 hover:bg-orange-50 dark:bg-orange-950/30 rounded-lg px-3 py-2 transition">
                                             Reessayer
                                         </button>
                                     </div>
@@ -475,8 +511,22 @@
                             </div>
                         </div>
 
+                        {{-- Dark mode toggle --}}
+                        <button @click="toggle()" class="relative p-2 rounded-lg text-on-surface-faint hover:bg-surface-hover hover:text-on-surface-secondary transition" title="Basculer mode sombre">
+                            {{-- Sun icon (shown in dark mode) --}}
+                            <svg x-show="dark" x-cloak class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                            {{-- Moon icon (shown in light mode) --}}
+                            <svg x-show="!dark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                            </svg>
+                        </button>
+
                         {{-- Notification bell --}}
-                        <button class="relative p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition">
+                        <button class="relative p-2 rounded-lg text-on-surface-faint hover:bg-surface-hover hover:text-on-surface-secondary transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                       d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -484,29 +534,29 @@
                         </button>
 
                         {{-- User avatar header --}}
-                        <div class="hidden sm:flex items-center gap-2 pl-3 border-l border-gray-200" x-data="{ profileOpen: false }">
+                        <div class="hidden sm:flex items-center gap-2 pl-3 border-l border-theme" x-data="{ profileOpen: false }">
                             <button @click="profileOpen = !profileOpen" class="flex items-center gap-2 hover:opacity-80 transition">
                                 @if(Auth::user()->avatar_path)
                                     <img src="{{ asset('storage/' . Auth::user()->avatar_path) }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
                                 @else
-                                    <div class="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">
-                                        <span class="text-xs font-semibold text-brand-600">{{ mb_substr(Auth::user()->name, 0, 1) }}</span>
+                                    <div class="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/40 flex items-center justify-center">
+                                        <span class="text-xs font-semibold text-brand-600 dark:text-brand-400">{{ mb_substr(Auth::user()->name, 0, 1) }}</span>
                                     </div>
                                 @endif
-                                <span class="text-sm font-medium text-gray-700 hidden lg:inline">{{ Auth::user()->name }}</span>
-                                <svg class="w-4 h-4 text-gray-400 hidden lg:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <span class="text-sm font-medium text-on-surface-secondary hidden lg:inline">{{ Auth::user()->name }}</span>
+                                <svg class="w-4 h-4 text-on-surface-faint hidden lg:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
                             </button>
                             <div x-show="profileOpen" @click.away="profileOpen = false" x-transition
-                                 class="absolute right-6 top-16 bg-white border border-gray-200 rounded-xl shadow-lg w-56 py-2 z-50" style="display:none;">
-                                <div class="px-4 py-2 border-b border-gray-100">
-                                    <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-gray-400">{{ Auth::user()->email ?? '' }}</p>
+                                 class="absolute right-6 top-16 bg-surface border border-theme rounded-xl shadow-lg w-56 py-2 z-50" style="display:none;">
+                                <div class="px-4 py-2 border-b border-theme-subtle">
+                                    <p class="text-sm font-medium text-on-surface">{{ Auth::user()->name }}</p>
+                                    <p class="text-xs text-on-surface-faint">{{ Auth::user()->email ?? '' }}</p>
                                 </div>
                                 <form method="POST" action="{{ route('logout') }}" data-no-offline>
                                     @csrf
-                                    <button type="submit" class="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
+                                    <button type="submit" class="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:bg-red-950/30 transition">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                                         Deconnexion
                                     </button>
@@ -523,7 +573,7 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
                          @click.away="mobileActions = false"
-                         class="md:hidden border-t border-gray-100 bg-gray-50/80 px-3 py-2.5" style="display:none;">
+                         class="md:hidden border-t border-theme-subtle bg-surface-hover px-3 py-2.5" style="display:none;">
                         <div class="flex flex-wrap items-center gap-2">
                             @yield('actions')
                         </div>
@@ -536,29 +586,29 @@
                      x-transition:leave="transition ease-in duration-150"
                      x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2"
                      @click.away="mobileSearch = false"
-                     class="sm:hidden border-t border-gray-100 bg-gray-50/80 px-3 py-2.5" style="display:none;"
+                     class="sm:hidden border-t border-theme-subtle bg-surface-hover px-3 py-2.5" style="display:none;"
                      x-data="globalSearch()" @keydown.escape.window="mobileSearch = false; open = false">
                     <div class="relative">
-                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-faint pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                         <input type="text" x-model="query" @input.debounce.300ms="search" @focus="if(results.length) open = true"
                                x-init="$nextTick(() => $el.focus())"
                                placeholder="Rechercher..." autocomplete="off"
-                               class="w-full pl-9 pr-3 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition placeholder-gray-400">
+                               class="w-full pl-9 pr-3 py-2.5 text-sm bg-surface border border-theme rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition placeholder-on-surface-faint">
                     </div>
                     <div x-show="open && (results.length > 0 || (query.length >= 2 && !loading))" x-transition
-                         class="mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto" style="display:none;">
+                         class="mt-2 bg-surface border border-theme rounded-xl shadow-lg max-h-64 overflow-y-auto" style="display:none;">
                         <template x-if="results.length === 0 && query.length >= 2 && !loading">
-                            <div class="px-4 py-6 text-center text-sm text-gray-400">Aucun resultat</div>
+                            <div class="px-4 py-6 text-center text-sm text-on-surface-faint">Aucun resultat</div>
                         </template>
                         <template x-for="(group, type) in grouped" :key="type">
                             <div>
-                                <div class="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 bg-gray-50/80 sticky top-0" x-text="type"></div>
+                                <div class="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-on-surface-faint bg-surface-hover sticky top-0" x-text="type"></div>
                                 <template x-for="item in group" :key="item.url">
-                                    <a :href="item.url" class="flex items-center gap-3 px-4 py-2.5 hover:bg-brand-50 transition">
+                                    <a :href="item.url" class="flex items-center gap-3 px-4 py-2.5 hover:bg-brand-50 dark:bg-brand-950/30 transition">
                                         <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                                             :class="item.icon === 'user' ? 'bg-blue-50 text-blue-500' : (item.icon === 'building' ? 'bg-purple-50 text-purple-500' : (item.icon === 'document' ? 'bg-amber-50 text-amber-500' : 'bg-green-50 text-green-500'))">
+                                             :class="item.icon === 'user' ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-500' : (item.icon === 'building' ? 'bg-purple-50 dark:bg-purple-950/30 text-purple-500' : (item.icon === 'document' ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-500' : 'bg-green-50 dark:bg-green-950/30 text-green-500'))">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <template x-if="item.icon === 'user'"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></template>
                                                 <template x-if="item.icon === 'building'"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></template>
@@ -567,8 +617,8 @@
                                             </svg>
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="text-sm font-medium text-gray-900 truncate" x-text="item.label"></p>
-                                            <p class="text-xs text-gray-400 truncate" x-text="item.sub"></p>
+                                            <p class="text-sm font-medium text-on-surface truncate" x-text="item.label"></p>
+                                            <p class="text-xs text-on-surface-faint truncate" x-text="item.sub"></p>
                                         </div>
                                     </a>
                                 </template>
@@ -584,14 +634,14 @@
                     <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
                          x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
                          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-8"
-                         class="pointer-events-auto flex items-center w-full max-w-sm p-4 bg-white rounded-lg shadow-lg border border-gray-100" role="alert">
-                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg">
+                         class="pointer-events-auto flex items-center w-full max-w-sm p-4 bg-surface rounded-lg shadow-lg border border-theme-subtle" role="alert">
+                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-green-500 bg-green-100 dark:bg-green-900/40 rounded-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                             </svg>
                         </div>
-                        <div class="ms-3 text-sm font-normal text-gray-800">{{ session('success') }}</div>
-                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 transition">
+                        <div class="ms-3 text-sm font-normal text-on-surface">{{ session('success') }}</div>
+                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-surface text-on-surface-faint hover:text-on-surface rounded-lg p-1.5 hover:bg-surface-hover inline-flex items-center justify-center h-8 w-8 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -601,14 +651,14 @@
                     <div x-data="{ show: true }" x-show="show"
                          x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
                          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-8"
-                         class="pointer-events-auto flex items-center w-full max-w-sm p-4 bg-white rounded-lg shadow-lg border border-gray-100" role="alert">
-                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg">
+                         class="pointer-events-auto flex items-center w-full max-w-sm p-4 bg-surface rounded-lg shadow-lg border border-theme-subtle" role="alert">
+                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-red-500 bg-red-100 dark:bg-red-900/40 rounded-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </div>
-                        <div class="ms-3 text-sm font-normal text-gray-800">{{ session('error') }}</div>
-                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 transition">
+                        <div class="ms-3 text-sm font-normal text-on-surface">{{ session('error') }}</div>
+                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-surface text-on-surface-faint hover:text-on-surface rounded-lg p-1.5 hover:bg-surface-hover inline-flex items-center justify-center h-8 w-8 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -618,14 +668,14 @@
                     <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 6000)"
                          x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
                          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-8"
-                         class="pointer-events-auto flex items-center w-full max-w-sm p-4 bg-white rounded-lg shadow-lg border border-gray-100" role="alert">
-                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-orange-500 bg-orange-100 rounded-lg">
+                         class="pointer-events-auto flex items-center w-full max-w-sm p-4 bg-surface rounded-lg shadow-lg border border-theme-subtle" role="alert">
+                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-orange-500 bg-orange-100 dark:bg-orange-900/40 rounded-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
                             </svg>
                         </div>
-                        <div class="ms-3 text-sm font-normal text-gray-800">{{ session('warning') }}</div>
-                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 transition">
+                        <div class="ms-3 text-sm font-normal text-on-surface">{{ session('warning') }}</div>
+                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-surface text-on-surface-faint hover:text-on-surface rounded-lg p-1.5 hover:bg-surface-hover inline-flex items-center justify-center h-8 w-8 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -635,14 +685,14 @@
                     <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
                          x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
                          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-8"
-                         class="pointer-events-auto flex items-center w-full max-w-sm p-4 bg-white rounded-lg shadow-lg border border-gray-100" role="alert">
-                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-blue-500 bg-blue-100 rounded-lg">
+                         class="pointer-events-auto flex items-center w-full max-w-sm p-4 bg-surface rounded-lg shadow-lg border border-theme-subtle" role="alert">
+                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-blue-500 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008zM21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <div class="ms-3 text-sm font-normal text-gray-800">{{ session('info') }}</div>
-                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 transition">
+                        <div class="ms-3 text-sm font-normal text-on-surface">{{ session('info') }}</div>
+                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-surface text-on-surface-faint hover:text-on-surface rounded-lg p-1.5 hover:bg-surface-hover inline-flex items-center justify-center h-8 w-8 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -652,20 +702,20 @@
                     <div x-data="{ show: true }" x-show="show"
                          x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0"
                          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-x-0" x-transition:leave-end="opacity-0 translate-x-8"
-                         class="pointer-events-auto flex items-start w-full max-w-sm p-4 bg-white rounded-lg shadow-lg border border-gray-100" role="alert">
-                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg mt-0.5">
+                         class="pointer-events-auto flex items-start w-full max-w-sm p-4 bg-surface rounded-lg shadow-lg border border-theme-subtle" role="alert">
+                        <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-red-500 bg-red-100 dark:bg-red-900/40 rounded-lg mt-0.5">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </div>
-                        <div class="ms-3 text-sm font-normal text-gray-800 flex-1">
+                        <div class="ms-3 text-sm font-normal text-on-surface flex-1">
                             <ul class="list-disc list-inside space-y-0.5">
                                 @foreach($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
                         </div>
-                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 transition shrink-0">
+                        <button @click="show = false" class="ms-auto -mx-1.5 -my-1.5 bg-surface text-on-surface-faint hover:text-on-surface rounded-lg p-1.5 hover:bg-surface-hover inline-flex items-center justify-center h-8 w-8 transition shrink-0">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -673,11 +723,11 @@
             </div>
 
             {{-- Print logo header (hidden on screen, visible on print) --}}
-            <div class="print-logo-header hidden items-center justify-center gap-4 px-6 py-4 border-b-2 border-gray-200">
+            <div class="print-logo-header hidden items-center justify-center gap-4 px-6 py-4 border-b-2 border-theme">
                 <img src="{{ asset('assets/img/logo.jpg') }}" alt="Logo" class="h-14 w-auto object-contain">
                 <div class="text-center">
-                    <h1 class="text-base font-bold text-gray-900 uppercase tracking-wide">MDA-Patrimoine</h1>
-                    <p class="text-[10px] text-gray-500">Gestion immobilière et de patrimoine</p>
+                    <h1 class="text-base font-bold text-on-surface uppercase tracking-wide">MDA-Patrimoine</h1>
+                    <p class="text-[10px] text-on-surface-muted">Gestion immobilière et de patrimoine</p>
                 </div>
             </div>
 
@@ -693,32 +743,35 @@
     </div>
 
     {{-- Mobile Bottom Navigation --}}
-    <nav class="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 lg:hidden print:hidden">
+    <nav class="fixed bottom-0 inset-x-0 z-40 bg-surface border-t border-theme lg:hidden print:hidden">
         <div class="flex items-center justify-around h-16 px-2">
-            <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-1 px-3 py-1 {{ request()->routeIs('dashboard') ? 'text-brand-500' : 'text-gray-400' }}">
+            <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-1 px-2 py-1 {{ request()->routeIs('dashboard') ? 'text-brand-500' : 'text-on-surface-faint' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v5a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10-2a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z"/></svg>
                 <span class="text-[10px] font-medium">Dashboard</span>
             </a>
-            <a href="{{ route('properties.index') }}" class="flex flex-col items-center gap-1 px-3 py-1 {{ request()->routeIs('properties.*') ? 'text-brand-500' : 'text-gray-400' }}">
+            <a href="{{ route('properties.index') }}" class="flex flex-col items-center gap-1 px-2 py-1 {{ request()->routeIs('properties.*') ? 'text-brand-500' : 'text-on-surface-faint' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 <span class="text-[10px] font-medium">Biens</span>
             </a>
-            <a href="{{ route('leases.index') }}" class="flex flex-col items-center gap-1 px-3 py-1 {{ request()->routeIs('leases.*') ? 'text-brand-500' : 'text-gray-400' }}">
+            <a href="{{ route('leases.index') }}" class="flex flex-col items-center gap-1 px-2 py-1 {{ request()->routeIs('leases.*') ? 'text-brand-500' : 'text-on-surface-faint' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 <span class="text-[10px] font-medium">Baux</span>
             </a>
-            <a href="{{ route('monthly-management.index') }}" class="flex flex-col items-center gap-1 px-3 py-1 {{ request()->routeIs('monthly-management.*') ? 'text-brand-500' : 'text-gray-400' }}">
+            <a href="{{ route('monthly-management.index') }}" class="flex flex-col items-center gap-1 px-2 py-1 {{ request()->routeIs('monthly-management.*') ? 'text-brand-500' : 'text-on-surface-faint' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span class="text-[10px] font-medium">Loyers</span>
             </a>
-            <button @click="sidebarMobile = !sidebarMobile" class="flex flex-col items-center gap-1 px-3 py-1 text-gray-400">
+            <a href="{{ route('tasks.index') }}" class="flex flex-col items-center gap-1 px-2 py-1 {{ request()->routeIs('tasks.*') ? 'text-brand-500' : 'text-on-surface-faint' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                <span class="text-[10px] font-medium">Taches</span>
+            </a>
+            <button @click="sidebarMobile = !sidebarMobile" class="flex flex-col items-center gap-1 px-2 py-1 text-on-surface-faint">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 <span class="text-[10px] font-medium">Menu</span>
             </button>
         </div>
     </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9/dist/umd/simple-datatables.js"></script>
     <script>
         function SCIDataTable(selector, options = {}) {

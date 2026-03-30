@@ -11,6 +11,7 @@ use App\Models\Reminder;
 use App\Models\Sci;
 use App\Models\Tenant;
 use App\Models\ServiceProvider as ServiceProviderModel;
+use App\Models\Task;
 use App\Models\User;
 use App\Policies\DocumentPolicy;
 use App\Policies\LeaseMonthlyPolicy;
@@ -21,6 +22,7 @@ use App\Policies\ReminderPolicy;
 use App\Policies\SciPolicy;
 use App\Policies\TenantPolicy;
 use App\Policies\ServiceProviderPolicy;
+use App\Policies\TaskPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -50,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Reminder::class, ReminderPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(ServiceProviderModel::class, ServiceProviderPolicy::class);
+        Gate::policy(Task::class, TaskPolicy::class);
 
         // Super admin bypasses all gates
         Gate::before(function ($user, $ability) {

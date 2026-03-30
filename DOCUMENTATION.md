@@ -710,7 +710,7 @@ Toutes les routes applicatives sont protegees par les middlewares `auth`, `verif
 ## 16. Schema relationnel
 
 ```
-┌─────────────┐     M:N      ┌─────────────┐
+┌──────────────┐     M:N      ┌──────────────┐
 │    Users     │─────────────>│    SCIs      │
 │              │  (sci_user)  │              │
 │ - name       │              │ - name       │
@@ -737,24 +737,24 @@ Toutes les routes applicatives sont protegees par les middlewares `auth`, `verif
                             │                            │
                             ▼                            ▼
                      ┌──────────────────────────────────────┐
-                     │              Leases                   │
-                     │                                       │
-                     │ - start_date    - rent_amount         │
-                     │ - end_date      - charges_amount      │
-                     │ - status        - deposit_amount      │
-                     │ - due_day       - penalty_rate        │
+                     │              Leases                  │
+                     │                                      │
+                     │ - start_date    - rent_amount        │
+                     │ - end_date      - charges_amount     │
+                     │ - status        - deposit_amount     │
+                     │ - due_day       - penalty_rate       │
                      └───────────────────┬──────────────────┘
                                          │
                                          │ 1:N
                                          ▼
                      ┌──────────────────────────────────────┐
-                     │         Lease Monthlies               │
-                     │                                       │
-                     │ - month          - total_due          │
-                     │ - rent_due       - paid_amount        │
-                     │ - charges_due    - remaining_amount   │
-                     │ - penalty_due    - status             │
-                     │ - due_date                            │
+                     │         Lease Monthlies              │
+                     │                                      │
+                     │ - month          - total_due         │
+                     │ - rent_due       - paid_amount       │
+                     │ - charges_due    - remaining_amount  │
+                     │ - penalty_due    - status            │
+                     │ - due_date                           │
                      └──────────┬──────────────┬────────────┘
                                 │              │
                            1:N  │              │  1:N
@@ -769,11 +769,11 @@ Toutes les routes applicatives sont protegees par les middlewares `auth`, `verif
                      └─────────────┘  └─────────────┘
 
                      ┌─────────────────────────────────┐
-                     │           Documents              │
-                     │                                  │
-                     │ - type         - path            │
-                     │ - related      - meta            │
-                     │   (polymorphe)                   │
+                     │           Documents             │
+                     │                                 │
+                     │ - type         - path           │
+                     │ - related      - meta           │
+                     │   (polymorphe)                  │
                      └─────────────────────────────────┘
 ```
 

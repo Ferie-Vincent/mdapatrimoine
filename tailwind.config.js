@@ -3,6 +3,8 @@ import forms from '@tailwindcss/forms';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class',
+
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
@@ -15,6 +17,22 @@ export default {
                 sans: ['Nunito', ...defaultTheme.fontFamily.sans],
             },
             colors: {
+                // Semantic colors (switch via CSS variables)
+                surface: {
+                    DEFAULT: 'var(--color-surface)',
+                    alt: 'var(--color-surface-alt)',
+                    hover: 'var(--color-surface-hover)',
+                },
+                'on-surface': {
+                    DEFAULT: 'var(--color-on-surface)',
+                    secondary: 'var(--color-on-surface-secondary)',
+                    muted: 'var(--color-on-surface-muted)',
+                    faint: 'var(--color-on-surface-faint)',
+                },
+                theme: {
+                    DEFAULT: 'var(--color-border)',
+                    subtle: 'var(--color-border-subtle)',
+                },
                 brand: {
                     50:  '#e8edf8',
                     100: '#c5d0ed',

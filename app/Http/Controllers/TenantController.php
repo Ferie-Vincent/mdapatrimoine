@@ -132,13 +132,17 @@ class TenantController extends Controller
             ->with('success', 'Locataire mis a jour avec succes.');
     }
 
-    public function destroy(Tenant $tenant): RedirectResponse
+    public function destroy(Tenant $tenant): RedirectResponse|JsonResponse
     {
         $this->authorize('delete', $tenant);
 
         $tenant->delete();
 
         AuditService::log('deleted', $tenant);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Locataire supprime avec succes.']);
+        }
 
         return redirect()
             ->route('tenants.index')

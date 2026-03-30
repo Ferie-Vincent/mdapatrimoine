@@ -6,9 +6,9 @@
 
     {{-- Header --}}
     <div class="mb-6">
-        <span class="text-brand-600 font-semibold tracking-wider text-xs uppercase mb-1 block">Médiathèque</span>
-        <h1 class="text-2xl text-gray-800 font-medium tracking-tight">Albums Photos</h1>
-        <p class="text-gray-500 mt-1 text-sm max-w-xl">
+        <span class="text-brand-600 dark:text-brand-400 font-semibold tracking-wider text-xs uppercase mb-1 block">Médiathèque</span>
+        <h1 class="text-2xl text-on-surface font-medium tracking-tight">Albums Photos</h1>
+        <p class="text-on-surface-muted mt-1 text-sm max-w-xl">
             Explorez les photos de vos biens immobiliers, classées par bien.
         </p>
     </div>
@@ -17,20 +17,20 @@
     <x-filters action="{{ route('gallery.index') }}">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-                <label for="search" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Recherche</label>
+                <label for="search" class="block text-xs font-semibold text-on-surface-muted uppercase tracking-wider mb-1.5">Recherche</label>
                 <div class="relative">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-on-surface-faint">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </span>
                     <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Référence, adresse..."
-                           class="block w-full pl-9 pr-3 py-2 rounded-xl border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:bg-white focus:border-brand-400 focus:ring-brand-400 transition">
+                           class="block w-full pl-9 pr-3 py-2 rounded-xl border-theme bg-surface-hover/50 text-sm placeholder-on-surface-faint focus:bg-surface focus:border-brand-400 focus:ring-brand-400 transition">
                 </div>
             </div>
             <div>
-                <label for="type" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Type de bien</label>
-                <select name="type" id="type" class="block w-full rounded-xl border-gray-200 bg-gray-50/50 text-sm focus:bg-white focus:border-brand-400 focus:ring-brand-400 transition py-2">
+                <label for="type" class="block text-xs font-semibold text-on-surface-muted uppercase tracking-wider mb-1.5">Type de bien</label>
+                <select name="type" id="type" class="block w-full rounded-xl border-theme bg-surface-hover/50 text-sm focus:bg-surface focus:border-brand-400 focus:ring-brand-400 transition py-2">
                     <option value="">Tous</option>
                     <option value="appartement" {{ request('type') === 'appartement' ? 'selected' : '' }}>Appartement</option>
                     <option value="maison" {{ request('type') === 'maison' ? 'selected' : '' }}>Maison</option>
@@ -42,8 +42,8 @@
                 </select>
             </div>
             <div>
-                <label for="status" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Statut</label>
-                <select name="status" id="status" class="block w-full rounded-xl border-gray-200 bg-gray-50/50 text-sm focus:bg-white focus:border-brand-400 focus:ring-brand-400 transition py-2">
+                <label for="status" class="block text-xs font-semibold text-on-surface-muted uppercase tracking-wider mb-1.5">Statut</label>
+                <select name="status" id="status" class="block w-full rounded-xl border-theme bg-surface-hover/50 text-sm focus:bg-surface focus:border-brand-400 focus:ring-brand-400 transition py-2">
                     <option value="">Tous</option>
                     <option value="disponible" {{ request('status') === 'disponible' ? 'selected' : '' }}>Disponible</option>
                     <option value="occupe" {{ request('status') === 'occupe' ? 'selected' : '' }}>Occupé</option>
@@ -54,7 +54,7 @@
     </x-filters>
 
     {{-- Photo counter --}}
-    <div class="mt-5 mb-4 flex items-center gap-2 text-sm text-gray-500">
+    <div class="mt-5 mb-4 flex items-center gap-2 text-sm text-on-surface-muted">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
@@ -77,14 +77,14 @@
                         <div class="relative">
                             {{-- Back cards (stacked effect) --}}
                             @if($count >= 3)
-                                <div class="absolute inset-0 rounded-xl border-4 border-white bg-white shadow-sm transform rotate-3 translate-x-1 translate-y-1"></div>
+                                <div class="absolute inset-0 rounded-xl border-4 border-white dark:border-surface-hover bg-surface shadow-sm transform rotate-3 translate-x-1 translate-y-1"></div>
                             @endif
                             @if($count >= 2)
-                                <div class="absolute inset-0 rounded-xl border-4 border-white bg-white shadow-sm transform -rotate-2 -translate-x-0.5 translate-y-0.5"></div>
+                                <div class="absolute inset-0 rounded-xl border-4 border-white dark:border-surface-hover bg-surface shadow-sm transform -rotate-2 -translate-x-0.5 translate-y-0.5"></div>
                             @endif
 
                             {{-- Main card --}}
-                            <div class="relative rounded-xl border-4 border-white bg-white shadow-md overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-lg">
+                            <div class="relative rounded-xl border-4 border-white dark:border-surface-hover bg-surface shadow-md overflow-hidden transition-all duration-500 group-hover:scale-[1.02] group-hover:shadow-lg">
                                 <img src="{{ asset('storage/' . $photos[0]) }}" alt="{{ $property->reference }}"
                                      class="w-full aspect-square object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
 
@@ -105,7 +105,7 @@
                         {{-- Type badge --}}
                         @if($property->type)
                             <div class="mt-2 text-center">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand-50 text-brand-600 capitalize">{{ $property->type }}</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-brand-50 dark:bg-brand-950/30 text-brand-600 dark:text-brand-400 capitalize">{{ $property->type }}</span>
                             </div>
                         @endif
                     </div>
@@ -128,28 +128,28 @@
 
                 {{-- Album header --}}
                 <template x-if="openAlbum !== null && albums[openAlbum]">
-                    <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+                    <div class="bg-surface rounded-2xl border border-theme-subtle p-6 mb-6">
                         <div class="flex flex-wrap items-center gap-3 mb-1">
-                            <a :href="albums[openAlbum].showUrl" class="text-lg font-semibold text-brand-600 hover:text-brand-800 transition" x-text="albums[openAlbum].reference"></a>
+                            <a :href="albums[openAlbum].showUrl" class="text-lg font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-800 dark:hover:text-brand-300 transition" x-text="albums[openAlbum].reference"></a>
                             <template x-if="albums[openAlbum].type">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-600 capitalize" x-text="albums[openAlbum].type"></span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-50 dark:bg-brand-950/30 text-brand-600 dark:text-brand-400 capitalize" x-text="albums[openAlbum].type"></span>
                             </template>
-                            <span class="text-sm text-gray-500" x-text="albums[openAlbum].address"></span>
-                            <span class="ml-auto text-xs text-gray-400" x-text="albums[openAlbum].photos.length + ' photo' + (albums[openAlbum].photos.length > 1 ? 's' : '')"></span>
+                            <span class="text-sm text-on-surface-muted" x-text="albums[openAlbum].address"></span>
+                            <span class="ml-auto text-xs text-on-surface-faint" x-text="albums[openAlbum].photos.length + ' photo' + (albums[openAlbum].photos.length > 1 ? 's' : '')"></span>
                         </div>
                         @if($properties->first()?->sci)
-                            <p class="text-xs text-gray-400 mt-1" x-show="albums[openAlbum]?.sci" x-text="'SCI : ' + (albums[openAlbum]?.sci || '')"></p>
+                            <p class="text-xs text-on-surface-faint mt-1" x-show="albums[openAlbum]?.sci" x-text="'SCI : ' + (albums[openAlbum]?.sci || '')"></p>
                         @endif
                     </div>
                 </template>
 
                 {{-- Photos grid (polaroid style) --}}
                 <template x-if="openAlbum !== null && albums[openAlbum]">
-                    <div class="bg-gray-50/50 rounded-2xl p-6 min-h-[300px]">
+                    <div class="bg-surface-hover/50 rounded-2xl p-6 min-h-[300px]">
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             <template x-for="(photo, idx) in albums[openAlbum].photos" :key="idx">
                                 <div class="group cursor-pointer" @click="openLightbox(idx)">
-                                    <div class="relative rounded-lg border-4 border-white bg-white shadow-md overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:scale-[1.03]">
+                                    <div class="relative rounded-lg border-4 border-white bg-surface shadow-md overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:scale-[1.03]">
                                         <img :src="photo" :alt="'Photo ' + (idx + 1)"
                                              class="w-full h-40 object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy">
                                     </div>
@@ -212,15 +212,15 @@
             {{ $properties->withQueryString()->links() }}
         </div>
     @else
-        <div class="bg-white rounded-2xl border border-gray-100 p-16 mt-6 text-center">
-            <div class="w-16 h-16 mx-auto rounded-full bg-gray-50 flex items-center justify-center mb-4">
-                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-surface rounded-2xl border border-theme-subtle p-16 mt-6 text-center">
+            <div class="w-16 h-16 mx-auto rounded-full bg-surface-hover flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-on-surface-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <p class="text-sm font-medium text-gray-500">Aucun bien avec des photos</p>
-            <p class="text-xs text-gray-400 mt-1">Ajoutez des photos depuis la fiche d'un bien immobilier.</p>
+            <p class="text-sm font-medium text-on-surface-muted">Aucun bien avec des photos</p>
+            <p class="text-xs text-on-surface-faint mt-1">Ajoutez des photos depuis la fiche d'un bien immobilier.</p>
         </div>
     @endif
 

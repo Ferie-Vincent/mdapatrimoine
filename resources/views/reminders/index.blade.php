@@ -41,9 +41,9 @@
             3 => 'Mise en demeure',
         ];
         $levelBadgeClasses = [
-            1 => 'bg-blue-100 text-blue-700',
-            2 => 'bg-orange-100 text-orange-700',
-            3 => 'bg-red-100 text-red-700',
+            1 => 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
+            2 => 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300',
+            3 => 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300',
         ];
         $channelLabels = [
             'email'    => 'Email',
@@ -57,39 +57,39 @@
     {{-- Stats cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {{-- En attente --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4">
-            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-accent-orange-50 text-accent-orange-400">
+        <div class="bg-surface rounded-2xl border border-theme-subtle shadow-sm px-5 py-4 flex items-center gap-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-accent-orange-50 dark:bg-accent-orange-950/30 text-accent-orange-400">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
             <div>
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">En attente</p>
-                <p class="text-xl font-bold text-gray-900">{{ $countBrouillon }}</p>
+                <p class="text-xs font-semibold text-on-surface-muted uppercase tracking-wider">En attente</p>
+                <p class="text-xl font-bold text-on-surface">{{ $countBrouillon }}</p>
             </div>
         </div>
         {{-- Envoyees aujourd'hui --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4">
-            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-accent-green-50 text-accent-green-400">
+        <div class="bg-surface rounded-2xl border border-theme-subtle shadow-sm px-5 py-4 flex items-center gap-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-accent-green-50 dark:bg-accent-green-950/30 text-accent-green-400">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
             <div>
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Envoy&eacute;es (aujourd'hui)</p>
-                <p class="text-xl font-bold text-gray-900">{{ $countEnvoyeAujourdhui }}</p>
+                <p class="text-xs font-semibold text-on-surface-muted uppercase tracking-wider">Envoy&eacute;es (aujourd'hui)</p>
+                <p class="text-xl font-bold text-on-surface">{{ $countEnvoyeAujourdhui }}</p>
             </div>
         </div>
         {{-- Echecs --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4">
-            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-accent-red-50 text-accent-red-400">
+        <div class="bg-surface rounded-2xl border border-theme-subtle shadow-sm px-5 py-4 flex items-center gap-4">
+            <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-accent-red-50 dark:bg-accent-red-950/30 text-accent-red-400">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
             <div>
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">&Eacute;checs d'envoi</p>
-                <p class="text-xl font-bold text-gray-900">{{ $countEchec }}</p>
+                <p class="text-xs font-semibold text-on-surface-muted uppercase tracking-wider">&Eacute;checs d'envoi</p>
+                <p class="text-xl font-bold text-on-surface">{{ $countEchec }}</p>
             </div>
         </div>
     </div>
@@ -98,8 +98,8 @@
     <x-filters action="{{ route('reminders.index') }}">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-                <label for="status" class="block text-xs font-semibold text-gray-500/80 uppercase tracking-wider mb-1">Statut</label>
-                <select name="status" id="status" class="block w-full rounded-xl border-gray-200 bg-gray-50/70 text-sm hover:border-brand-200 focus:bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
+                <label for="status" class="block text-xs font-semibold text-on-surface-muted/80 uppercase tracking-wider mb-1">Statut</label>
+                <select name="status" id="status" class="block w-full rounded-xl border-theme bg-surface-hover/70 text-sm text-on-surface hover:border-brand-200 dark:border-gray-600 focus:bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
                     <option value="">Tous</option>
                     <option value="brouillon" {{ request('status') === 'brouillon' ? 'selected' : '' }}>Brouillon</option>
                     <option value="envoye" {{ request('status') === 'envoye' ? 'selected' : '' }}>Envoy&eacute;e</option>
@@ -107,8 +107,8 @@
                 </select>
             </div>
             <div>
-                <label for="channel" class="block text-xs font-semibold text-gray-500/80 uppercase tracking-wider mb-1">Canal</label>
-                <select name="channel" id="channel" class="block w-full rounded-xl border-gray-200 bg-gray-50/70 text-sm hover:border-brand-200 focus:bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
+                <label for="channel" class="block text-xs font-semibold text-on-surface-muted/80 uppercase tracking-wider mb-1">Canal</label>
+                <select name="channel" id="channel" class="block w-full rounded-xl border-theme bg-surface-hover/70 text-sm text-on-surface hover:border-brand-200 dark:border-gray-600 focus:bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
                     <option value="">Tous</option>
                     <option value="email" {{ request('channel') === 'email' ? 'selected' : '' }}>Email</option>
                     <option value="sms" {{ request('channel') === 'sms' ? 'selected' : '' }}>SMS</option>
@@ -117,8 +117,8 @@
                 </select>
             </div>
             <div>
-                <label for="level" class="block text-xs font-semibold text-gray-500/80 uppercase tracking-wider mb-1">Niveau</label>
-                <select name="level" id="level" class="block w-full rounded-xl border-gray-200 bg-gray-50/70 text-sm hover:border-brand-200 focus:bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
+                <label for="level" class="block text-xs font-semibold text-on-surface-muted/80 uppercase tracking-wider mb-1">Niveau</label>
+                <select name="level" id="level" class="block w-full rounded-xl border-theme bg-surface-hover/70 text-sm text-on-surface hover:border-brand-200 dark:border-gray-600 focus:bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
                     <option value="">Tous</option>
                     <option value="1" {{ request('level') === '1' ? 'selected' : '' }}>Niveau 1 &mdash; Courtois</option>
                     <option value="2" {{ request('level') === '2' ? 'selected' : '' }}>Niveau 2 &mdash; Ferme</option>
@@ -129,28 +129,28 @@
     </x-filters>
 
     {{-- Table --}}
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mt-6">
+    <div class="bg-surface rounded-2xl border border-theme-subtle shadow-sm overflow-hidden mt-6">
         @if($reminders->count())
             <div class="overflow-x-auto">
                 <table id="dataTable" class="min-w-full">
                     <thead class="">
                         <tr>
-                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Date</th>
-                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Locataire</th>
-                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Bien</th>
-                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Mois</th>
-                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Canal</th>
-                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Niveau</th>
-                            <th class="px-6 py-3.5 text-right text-sm font-medium text-gray-400">Montant restant</th>
-                            <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Statut</th>
-                            <th class="px-6 py-3.5 text-right text-sm font-medium text-gray-400">Actions</th>
+                            <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Date</th>
+                            <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Locataire</th>
+                            <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Bien</th>
+                            <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Mois</th>
+                            <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Canal</th>
+                            <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Niveau</th>
+                            <th class="px-6 py-3.5 text-right text-sm font-medium text-on-surface-faint">Montant restant</th>
+                            <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Statut</th>
+                            <th class="px-6 py-3.5 text-right text-sm font-medium text-on-surface-faint">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-theme-subtle">
                         @foreach($reminders as $reminder)
-                            <tr class="hover:bg-gray-50/50 transition">
+                            <tr class="hover:bg-surface-hover/50 transition">
                                 {{-- Date --}}
-                                <td class="px-6 py-5 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td class="px-6 py-5 whitespace-nowrap text-sm font-medium text-on-surface">
                                     {{ $reminder->created_at?->format('d/m/Y') }}
                                 </td>
 
@@ -160,17 +160,17 @@
                                         <div class="w-7 h-7 rounded-md bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shrink-0">
                                             <span class="text-white font-semibold text-[10px]">{{ strtoupper(substr($reminder->leaseMonthly->lease->tenant->first_name ?? '', 0, 1) . substr($reminder->leaseMonthly->lease->tenant->last_name ?? '', 0, 1)) }}</span>
                                         </div>
-                                        <span class="text-sm font-medium text-gray-900">{{ $reminder->leaseMonthly->lease->tenant->full_name ?? '-' }}</span>
+                                        <span class="text-sm font-medium text-on-surface">{{ $reminder->leaseMonthly->lease->tenant->full_name ?? '-' }}</span>
                                     </div>
                                 </td>
 
                                 {{-- Bien --}}
-                                <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
+                                <td class="px-6 py-5 whitespace-nowrap text-sm text-on-surface-secondary">
                                     {{ $reminder->leaseMonthly->lease->property->reference ?? '-' }}
                                 </td>
 
                                 {{-- Mois --}}
-                                <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">
+                                <td class="px-6 py-5 whitespace-nowrap text-sm text-on-surface-secondary">
                                     {{ $reminder->leaseMonthly->month ?? '-' }}
                                 </td>
 
@@ -213,23 +213,23 @@
                                                     </svg>
                                                 </span>
                                         @endswitch
-                                        <span class="text-gray-600">{{ $channelLabels[$reminder->channel] ?? ucfirst($reminder->channel) }}</span>
+                                        <span class="text-on-surface-secondary">{{ $channelLabels[$reminder->channel] ?? ucfirst($reminder->channel) }}</span>
                                     </div>
                                 </td>
 
                                 {{-- Niveau (badge) --}}
                                 <td class="px-6 py-5 whitespace-nowrap">
                                     @if($reminder->level)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $levelBadgeClasses[$reminder->level] ?? 'bg-gray-100 text-gray-700' }}">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $levelBadgeClasses[$reminder->level] ?? 'bg-surface-alt text-on-surface-secondary' }}">
                                             {{ $levelLabels[$reminder->level] ?? 'Niveau '.$reminder->level }}
                                         </span>
                                     @else
-                                        <span class="text-sm text-gray-400">&mdash;</span>
+                                        <span class="text-sm text-on-surface-faint">&mdash;</span>
                                     @endif
                                 </td>
 
                                 {{-- Montant restant --}}
-                                <td class="px-6 py-5 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
+                                <td class="px-6 py-5 whitespace-nowrap text-sm font-semibold text-on-surface text-right">
                                     {{ number_format($reminder->leaseMonthly->remaining_amount ?? 0, 0, ',', ' ') }} FCFA
                                 </td>
 
@@ -245,7 +245,7 @@
                                         <form method="POST" action="{{ route('reminders.send', $reminder) }}" class="inline"
                                               x-data x-on:submit.prevent="if(confirm('Envoyer cette relance ?')) $el.submit()">
                                             @csrf
-                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-orange-600 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition">
+                                            <button type="submit" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-orange-600 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/30 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-800/40 dark:bg-orange-900/40 transition">
                                                 <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                                 </svg>
@@ -255,7 +255,7 @@
                                         @endcan
                                     @endif
                                     <button type="button" data-open-modal="reminder-message-{{ $reminder->id }}"
-                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition">
+                                            class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-on-surface-secondary bg-surface-hover border border-theme rounded-lg hover:bg-surface-alt transition">
                                         <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -268,7 +268,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-6 py-4 border-t border-gray-100">
+            <div class="px-6 py-4 border-t border-theme-subtle">
                 {{ $reminders->withQueryString()->links() }}
             </div>
         @else
@@ -280,53 +280,53 @@
     @foreach($reminders as $reminder)
         <x-modal name="reminder-message-{{ $reminder->id }}" maxWidth="lg">
             <div class="p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">D&eacute;tail de la relance</h2>
+                <h2 class="text-lg font-semibold text-on-surface mb-4">D&eacute;tail de la relance</h2>
 
                 <div class="space-y-3 mb-5">
                     {{-- Canal --}}
                     <div class="flex items-center gap-2 text-sm">
-                        <span class="font-medium text-gray-500 w-28">Canal</span>
-                        <span class="text-gray-900">{{ $channelLabels[$reminder->channel] ?? ucfirst($reminder->channel) }}</span>
+                        <span class="font-medium text-on-surface-muted w-28">Canal</span>
+                        <span class="text-on-surface">{{ $channelLabels[$reminder->channel] ?? ucfirst($reminder->channel) }}</span>
                     </div>
                     {{-- Niveau --}}
                     <div class="flex items-center gap-2 text-sm">
-                        <span class="font-medium text-gray-500 w-28">Niveau</span>
+                        <span class="font-medium text-on-surface-muted w-28">Niveau</span>
                         @if($reminder->level)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $levelBadgeClasses[$reminder->level] ?? 'bg-gray-100 text-gray-700' }}">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $levelBadgeClasses[$reminder->level] ?? 'bg-surface-alt text-on-surface-secondary' }}">
                                 {{ $levelLabels[$reminder->level] ?? 'Niveau '.$reminder->level }}
                             </span>
                         @else
-                            <span class="text-gray-400">&mdash;</span>
+                            <span class="text-on-surface-faint">&mdash;</span>
                         @endif
                     </div>
                     {{-- Envoyee le --}}
                     @if($reminder->sent_at)
                         <div class="flex items-center gap-2 text-sm">
-                            <span class="font-medium text-gray-500 w-28">Envoy&eacute;e le</span>
-                            <span class="text-gray-900">{{ $reminder->sent_at->format('d/m/Y H:i') }}</span>
+                            <span class="font-medium text-on-surface-muted w-28">Envoy&eacute;e le</span>
+                            <span class="text-on-surface">{{ $reminder->sent_at->format('d/m/Y H:i') }}</span>
                         </div>
                     @endif
                     {{-- Delivree le --}}
                     @if($reminder->delivered_at)
                         <div class="flex items-center gap-2 text-sm">
-                            <span class="font-medium text-gray-500 w-28">D&eacute;livr&eacute;e le</span>
-                            <span class="text-gray-900">{{ $reminder->delivered_at->format('d/m/Y H:i') }}</span>
+                            <span class="font-medium text-on-surface-muted w-28">D&eacute;livr&eacute;e le</span>
+                            <span class="text-on-surface">{{ $reminder->delivered_at->format('d/m/Y H:i') }}</span>
                         </div>
                     @endif
                     {{-- Erreur --}}
                     @if($reminder->error_message)
                         <div class="flex items-start gap-2 text-sm">
-                            <span class="font-medium text-gray-500 w-28 shrink-0">Erreur</span>
+                            <span class="font-medium text-on-surface-muted w-28 shrink-0">Erreur</span>
                             <span class="text-red-600">{{ $reminder->error_message }}</span>
                         </div>
                     @endif
                 </div>
 
-                <div class="bg-gray-50/50 rounded-xl border border-gray-100 p-4 text-sm text-gray-700 whitespace-pre-line">{{ $reminder->message ?? 'Aucun message.' }}</div>
+                <div class="bg-surface-hover/50 rounded-xl border border-theme-subtle p-4 text-sm text-on-surface-secondary whitespace-pre-line">{{ $reminder->message ?? 'Aucun message.' }}</div>
 
                 <div class="mt-5 flex justify-end">
                     <button type="button" x-on:click="$dispatch('close-modal', 'reminder-message-{{ $reminder->id }}')"
-                            class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 transition">
+                            class="inline-flex items-center px-4 py-2 bg-surface border border-theme rounded-lg font-semibold text-xs text-on-surface-secondary uppercase tracking-widest hover:bg-surface-hover transition">
                         Fermer
                     </button>
                 </div>
@@ -349,9 +349,9 @@
         <div class="space-y-4">
             {{-- Echeance impayee --}}
             <div>
-                <label for="new_lease_monthly_id" class="block text-xs font-semibold text-gray-500/80 uppercase tracking-wider mb-1">&Eacute;ch&eacute;ance impay&eacute;e <span class="text-red-500">*</span></label>
+                <label for="new_lease_monthly_id" class="block text-xs font-semibold text-on-surface-muted/80 uppercase tracking-wider mb-1">&Eacute;ch&eacute;ance impay&eacute;e <span class="text-red-500">*</span></label>
                 <select name="lease_monthly_id" id="new_lease_monthly_id" required
-                        class="block w-full rounded-xl border-gray-200 bg-gray-50/70 text-sm hover:border-brand-200 focus:bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
+                        class="block w-full rounded-xl border-theme bg-surface-hover/70 text-sm text-on-surface hover:border-brand-200 dark:border-gray-600 focus:bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
                     <option value="">S&eacute;lectionner une &eacute;ch&eacute;ance</option>
                     @foreach($unpaidMonthlies as $monthly)
                         <option value="{{ $monthly->id }}">
@@ -363,9 +363,9 @@
 
             {{-- Canal --}}
             <div>
-                <label for="new_channel" class="block text-xs font-semibold text-gray-500/80 uppercase tracking-wider mb-1">Canal <span class="text-red-500">*</span></label>
+                <label for="new_channel" class="block text-xs font-semibold text-on-surface-muted/80 uppercase tracking-wider mb-1">Canal <span class="text-red-500">*</span></label>
                 <select name="channel" id="new_channel" required
-                        class="block w-full rounded-xl border-gray-200 bg-gray-50/70 text-sm hover:border-brand-200 focus:bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
+                        class="block w-full rounded-xl border-theme bg-surface-hover/70 text-sm text-on-surface hover:border-brand-200 dark:border-gray-600 focus:bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
                     <option value="">S&eacute;lectionner</option>
                     <option value="whatsapp">WhatsApp</option>
                     <option value="sms">SMS</option>
@@ -376,9 +376,9 @@
 
             {{-- Niveau --}}
             <div>
-                <label for="new_level" class="block text-xs font-semibold text-gray-500/80 uppercase tracking-wider mb-1">Niveau <span class="text-red-500">*</span></label>
+                <label for="new_level" class="block text-xs font-semibold text-on-surface-muted/80 uppercase tracking-wider mb-1">Niveau <span class="text-red-500">*</span></label>
                 <select name="level" id="new_level" required
-                        class="block w-full rounded-xl border-gray-200 bg-gray-50/70 text-sm hover:border-brand-200 focus:bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
+                        class="block w-full rounded-xl border-theme bg-surface-hover/70 text-sm text-on-surface hover:border-brand-200 dark:border-gray-600 focus:bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5">
                     <option value="">S&eacute;lectionner</option>
                     <option value="1">Niveau 1 &mdash; Courtois</option>
                     <option value="2">Niveau 2 &mdash; Ferme</option>
@@ -388,9 +388,9 @@
 
             {{-- Message --}}
             <div>
-                <label for="new_message" class="block text-xs font-semibold text-gray-500/80 uppercase tracking-wider mb-1">Message</label>
+                <label for="new_message" class="block text-xs font-semibold text-on-surface-muted/80 uppercase tracking-wider mb-1">Message</label>
                 <textarea name="message" id="new_message" rows="5"
-                          class="block w-full rounded-xl border-gray-200 bg-gray-50/70 text-sm hover:border-brand-200 focus:bg-white focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5"
+                          class="block w-full rounded-xl border-theme bg-surface-hover/70 text-sm text-on-surface hover:border-brand-200 dark:border-gray-600 focus:bg-surface focus:border-brand-400 focus:ring-2 focus:ring-brand-500/20 transition-all py-2.5"
                           placeholder="Message de relance..."></textarea>
             </div>
         </div>

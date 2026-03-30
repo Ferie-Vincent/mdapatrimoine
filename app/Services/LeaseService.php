@@ -27,6 +27,7 @@ class LeaseService
     {
         return DB::transaction(function () use ($data): Lease {
             $propertyId = $data['property_id'];
+            $property = Property::findOrFail($propertyId);
 
             // Validate: no active lease on this property
             $hasActiveLease = Lease::where('property_id', $propertyId)
@@ -37,6 +38,11 @@ class LeaseService
                 throw new \InvalidArgumentException(
                     "Ce bien immobilier a deja un bail actif ou en attente. Impossible de creer un nouveau bail."
                 );
+            }
+
+            // Branch: meuble vs classique
+            if ($property->isMeuble()) {
+                return $this->createMeubleLease($data, $property);
             }
 
             // Apply default settings if not provided
@@ -80,6 +86,72 @@ class LeaseService
 
             return $lease;
         });
+    }
+
+    /**
+     * Create a meuble (furnished short-stay) lease.
+     */
+    private function createMeubleLease(array $data, Property $property): Lease
+    {
+        $checkIn = \Carbon\Carbon::parse($data['check_in_date']);
+        $checkOut = \Carbon\Carbon::parse($data['check_out_date']);
+        $nights = $checkIn->diffInDays($checkOut);
+
+        $dailyRate = (float) ($data['daily_rate'] ?? $property->daily_rate);
+
+        // Progressive discount tiers
+        $discountRate = match (true) {
+            $nights >= 21 => 15,
+            $nights >= 14 => 10,
+            $nights >= 7  => 5,
+            default       => 0,
+        };
+
+        $subtotal = $dailyRate * $nights;
+        $discountAmount = round($subtotal * $discountRate / 100, 2);
+        $totalAmount = $subtotal - $discountAmount;
+
+        $leaseData = array_merge($data, [
+            'lease_type'         => 'meuble',
+            'start_date'         => $checkIn->toDateString(),
+            'end_date'           => $checkOut->toDateString(),
+            'check_in_date'      => $checkIn->toDateString(),
+            'check_out_date'     => $checkOut->toDateString(),
+            'nights_count'       => $nights,
+            'daily_rate'         => $dailyRate,
+            'discount_rate'      => $discountRate,
+            'discount_amount'    => $discountAmount,
+            'total_amount'       => $totalAmount,
+            'rent_amount'        => $totalAmount,
+            'deposit_amount'     => 0,
+            'caution_2_mois'     => 0,
+            'loyers_avances_2_mois' => 0,
+            'frais_agence'       => 0,
+            'penalty_rate'       => 0,
+            'penalty_delay_days' => 0,
+            'due_day'            => null,
+        ]);
+
+        $lease = Lease::create($leaseData);
+
+        // Set property status to 'occupe'
+        Property::where('id', $property->id)->update(['status' => 'occupe']);
+
+        // If active, create a single LeaseMonthly for the total amount
+        if ($lease->status === 'actif') {
+            $this->monthlyService->generateForMeubleLease($lease);
+        }
+
+        // Log audit
+        AuditService::log(
+            'created',
+            Lease::class,
+            $lease->id,
+            $leaseData,
+            (int) $lease->sci_id
+        );
+
+        return $lease;
     }
 
     /**
@@ -144,7 +216,11 @@ class LeaseService
             Property::where('id', $lease->property_id)->update(['status' => 'occupe']);
 
             // Generate monthlies
-            $this->monthlyService->generateForLease($lease);
+            if ($lease->isMeuble()) {
+                $this->monthlyService->generateForMeubleLease($lease);
+            } else {
+                $this->monthlyService->generateForLease($lease);
+            }
 
             // Log audit
             AuditService::log(

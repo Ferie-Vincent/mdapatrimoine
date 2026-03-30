@@ -109,13 +109,17 @@ class ServiceProviderController extends Controller
             ->with('success', 'Prestataire mis a jour avec succes.');
     }
 
-    public function destroy(ServiceProvider $provider): RedirectResponse
+    public function destroy(ServiceProvider $provider): RedirectResponse|JsonResponse
     {
         $this->authorize('delete', $provider);
 
         $provider->delete();
 
         AuditService::log('deleted', $provider);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Prestataire supprime avec succes.']);
+        }
 
         return redirect()
             ->route('service-providers.index')

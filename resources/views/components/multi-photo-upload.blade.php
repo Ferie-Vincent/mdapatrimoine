@@ -78,7 +78,7 @@
         }
      }">
 
-    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Photos</p>
+    <p class="text-xs font-semibold text-on-surface-muted uppercase tracking-wider mb-3">Photos</p>
 
     {{-- Main file input for form submission (never directly interacted with by user) --}}
     <input type="file" name="{{ $name }}[]" id="{{ $inputId }}" accept=".jpg,.jpeg,.png,.webp" multiple class="hidden"
@@ -87,11 +87,11 @@
     {{-- Existing photos --}}
     <template x-if="existing.length > 0">
         <div class="mb-3">
-            <p class="text-xs text-gray-500 mb-2">Photos actuelles</p>
+            <p class="text-xs text-on-surface-muted mb-2">Photos actuelles</p>
             <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                 <template x-for="(photo, idx) in existing" :key="'existing-'+idx">
                     <div class="relative group rounded-lg overflow-hidden border"
-                         :class="isMarkedForDelete(photo) ? 'border-red-300 opacity-50' : 'border-gray-200'">
+                         :class="isMarkedForDelete(photo) ? 'border-red-300 opacity-50' : 'border-theme'">
                         <img :src="'/storage/' + photo" class="w-full h-20 object-cover" :alt="'Photo ' + (idx+1)">
                         <button type="button"
                                 @click="toggleDelete(photo)"
@@ -112,10 +112,10 @@
 
     {{-- New photo previews --}}
     <div x-show="previews.length > 0" class="mb-3">
-        <p class="text-xs text-gray-500 mb-2">Nouvelles photos</p>
+        <p class="text-xs text-on-surface-muted mb-2">Nouvelles photos</p>
         <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
             <template x-for="(preview, idx) in previews" :key="'new-'+idx">
-                <div class="relative group rounded-lg overflow-hidden border border-brand-200">
+                <div class="relative group rounded-lg overflow-hidden border border-brand-200 dark:border-gray-600">
                     <img :src="preview.url" class="w-full h-20 object-cover" :alt="preview.name">
                     <button type="button"
                             @click="removeNew(idx)"
@@ -136,18 +136,18 @@
     <div x-show="remaining > 0"
          @click="$refs.picker.click()"
          class="flex flex-col items-center justify-center w-full py-4 border-2 border-dashed rounded-lg cursor-pointer transition"
-         :class="dragOver ? 'border-brand-400 bg-brand-50/50' : 'border-gray-300 bg-gray-50/50 hover:bg-gray-100/50'"
+         :class="dragOver ? 'border-brand-400 bg-brand-50/50 dark:bg-brand-950/30' : 'border-theme bg-surface-hover/50 hover:bg-surface-alt/50'"
          x-on:dragover.prevent="dragOver = true"
          x-on:dragleave.prevent="dragOver = false"
          x-on:drop.prevent="handleDrop($event)">
-        <svg class="w-6 h-6 mb-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 mb-1 text-on-surface-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
-        <p class="text-xs text-gray-500"><span class="font-semibold text-brand-600">Cliquer pour ajouter</span> ou glisser-deposer</p>
-        <p class="mt-0.5 text-xs text-gray-400">JPG, PNG ou WebP (max 5 Mo par photo, <span x-text="remaining"></span> restante<span x-show="remaining > 1">s</span>)</p>
+        <p class="text-xs text-on-surface-muted"><span class="font-semibold text-brand-600 dark:text-brand-400">Cliquer pour ajouter</span> ou glisser-deposer</p>
+        <p class="mt-0.5 text-xs text-on-surface-faint">JPG, PNG ou WebP (max 5 Mo par photo, <span x-text="remaining"></span> restante<span x-show="remaining > 1">s</span>)</p>
     </div>
 
-    <p x-show="remaining <= 0" class="text-xs text-gray-500 italic">Nombre maximum de photos atteint ({{ $max }}).</p>
+    <p x-show="remaining <= 0" class="text-xs text-on-surface-muted italic">Nombre maximum de photos atteint ({{ $max }}).</p>
 
     @error('photos')   <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
     @error('photos.*') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror

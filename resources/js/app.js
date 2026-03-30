@@ -1,6 +1,7 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
+import Sortable from 'sortablejs';
 
 window.Alpine = Alpine;
 
@@ -27,11 +28,11 @@ window.toast = function (message, type = 'error', duration = 0) {
     };
 
     const el = document.createElement('div');
-    el.className = 'pointer-events-auto flex items-start w-full max-w-sm p-4 bg-white rounded-lg shadow-lg border border-gray-100 transition-all duration-300 opacity-0 translate-x-8';
+    el.className = 'pointer-events-auto flex items-start w-full max-w-sm p-4 bg-surface rounded-lg shadow-lg border border-theme-subtle transition-all duration-300 opacity-0 translate-x-8';
     el.innerHTML = `
         <div class="inline-flex items-center justify-center shrink-0 w-8 h-8 ${colors[type] || colors.error} rounded-lg">${icons[type] || icons.error}</div>
-        <div class="ms-3 text-sm font-normal text-gray-800 flex-1">${message}</div>
-        <button class="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 transition shrink-0">
+        <div class="ms-3 text-sm font-normal text-on-surface flex-1">${message}</div>
+        <button class="ms-auto -mx-1.5 -my-1.5 bg-surface text-on-surface-faint hover:text-on-surface rounded-lg p-1.5 hover:bg-surface-hover inline-flex items-center justify-center h-8 w-8 transition shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
     `;
@@ -153,6 +154,31 @@ class OfflineQueue {
             req.onsuccess = () => resolve(req.result);
             req.onerror = () => reject(req.error);
         });
+    }
+
+    async cleanup(maxAgeDays = 7) {
+        const db = await this.open();
+        const all = await this.getAll();
+        const now = Date.now();
+        const failedMaxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+        const pendingMaxAge = maxAgeDays * 24 * 60 * 60 * 1000;
+        let cleaned = 0;
+
+        for (const entry of all) {
+            const age = now - (entry.createdAt || 0);
+            if (entry.status === 'failed' && age > failedMaxAge) {
+                await this.delete(entry.id);
+                cleaned++;
+            } else if (entry.status === 'pending' && age > pendingMaxAge) {
+                await this.delete(entry.id);
+                cleaned++;
+            }
+        }
+
+        if (cleaned > 0) {
+            window.dispatchEvent(new CustomEvent('offline-queue-changed'));
+        }
+        return cleaned;
     }
 }
 
@@ -340,6 +366,45 @@ if ('serviceWorker' in navigator) {
         }
     });
 }
+
+// ============================================================================
+// Theme Manager (Dark Mode)
+// ============================================================================
+Alpine.data('themeManager', () => ({
+    dark: false,
+
+    init() {
+        const stored = localStorage.getItem('scimanager-theme');
+        if (stored === 'dark') {
+            this.dark = true;
+        } else if (stored === 'light') {
+            this.dark = false;
+        } else {
+            this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        this.applyTheme();
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('scimanager-theme')) {
+                this.dark = e.matches;
+                this.applyTheme();
+            }
+        });
+    },
+
+    toggle() {
+        this.dark = !this.dark;
+        localStorage.setItem('scimanager-theme', this.dark ? 'dark' : 'light');
+        this.applyTheme();
+        window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark: this.dark } }));
+    },
+
+    applyTheme() {
+        document.documentElement.classList.toggle('dark', this.dark);
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = this.dark ? '#141422' : '#1E3A8A';
+    },
+}));
 
 // ============================================================================
 // Connection Status Alpine Component
@@ -674,4 +739,397 @@ Alpine.data('moneyInput', (initialValue = '', min = null, max = null) => ({
     },
 }));
 
+Alpine.data('deleteAction', () => ({
+    loading: false,
+
+    confirmDelete(url, rowEl, description = 'cet element') {
+        if (!confirm(`Etes-vous sur de vouloir supprimer ${description} ?`)) return;
+
+        this.loading = true;
+        const csrfToken = document.querySelector('meta[name=csrf-token]').content;
+
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(res.status);
+            return res.json();
+        })
+        .then(data => {
+            // Fade out the row
+            if (rowEl) {
+                rowEl.style.transition = 'opacity 0.3s, transform 0.3s';
+                rowEl.style.opacity = '0';
+                rowEl.style.transform = 'translateX(20px)';
+                setTimeout(() => rowEl.remove(), 300);
+            }
+            window.toast(data.message || 'Supprime avec succes.', 'success', 5000);
+        })
+        .catch(() => {
+            this.loading = false;
+            window.toast('Erreur lors de la suppression.', 'error');
+        });
+    },
+}));
+
+// ============================================================================
+// Kanban Board (Ma Journée)
+// ============================================================================
+Alpine.data('kanbanBoard', (config) => ({
+    columns: config.columns || { a_faire: [], en_cours: [], bloque: [], fait: [], archive: [] },
+    selectedDate: config.selectedDate || new Date().toISOString().slice(0, 10),
+    showArchived: config.showArchived || false,
+    isSuperAdmin: config.isSuperAdmin || false,
+    canCreate: config.canCreate || false,
+    assignableUsers: config.assignableUsers || {},
+    routes: config.routes || {},
+    csrfToken: config.csrfToken || '',
+    modalOpen: false,
+    recapOpen: false,
+    editingTask: null,
+    submitting: false,
+    generating: false,
+    sortables: [],
+    form: {
+        title: '', description: '', category: 'autre', priority: 'moyenne',
+        scheduled_date: '', scheduled_time: '', amount: '', reminder_at: '', user_id: '',
+        recurrence: '', recurrence_end_date: '',
+    },
+
+    get todayStr() { return new Date().toISOString().slice(0, 10); },
+
+    get completedCount() {
+        return (this.columns.fait || []).length;
+    },
+
+    get totalCount() {
+        return (this.columns.a_faire || []).length
+             + (this.columns.en_cours || []).length
+             + (this.columns.bloque || []).length
+             + (this.columns.fait || []).length;
+    },
+
+    get progressPercent() {
+        return this.totalCount > 0 ? Math.round(this.completedCount / this.totalCount * 100) : 0;
+    },
+
+    get pendingTasks() {
+        return [
+            ...(this.columns.a_faire || []),
+            ...(this.columns.en_cours || []),
+            ...(this.columns.bloque || []),
+        ];
+    },
+
+    get recapByCategory() {
+        const groups = {};
+        this.pendingTasks.forEach(t => {
+            const cat = t.category || 'autre';
+            if (!groups[cat]) groups[cat] = { tasks: [], total: 0 };
+            groups[cat].tasks.push(t);
+            groups[cat].total += parseFloat(t.amount || 0);
+        });
+        return groups;
+    },
+
+    get recapTotalAmount() {
+        return this.pendingTasks.reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    },
+
+    init() {
+        this.$nextTick(() => this.initSortables());
+    },
+
+    initSortables() {
+        // Destroy existing sortables
+        this.sortables.forEach(s => s.destroy());
+        this.sortables = [];
+
+        if (!this.canCreate) return;
+
+        const statuses = ['a_faire', 'en_cours', 'bloque', 'fait', 'archive'];
+        statuses.forEach(status => {
+            const el = this.$refs['column_' + status];
+            if (!el) return;
+
+            const sortable = Sortable.create(el, {
+                group: 'kanban',
+                animation: 150,
+                ghostClass: 'opacity-30',
+                dragClass: 'shadow-2xl',
+                delay: 150,
+                delayOnTouchOnly: true,
+                draggable: '[data-id]',
+                onEnd: (evt) => this.onDragEnd(evt),
+            });
+
+            this.sortables.push(sortable);
+        });
+    },
+
+    async onDragEnd(evt) {
+        const taskId = evt.item.dataset.id;
+        const newStatus = evt.to.dataset.status;
+        const newIndex = evt.newIndex;
+
+        try {
+            const res = await fetch(this.routes.move + '/' + taskId + '/move', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken,
+                },
+                body: JSON.stringify({ status: newStatus, position: newIndex }),
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                this.refreshBoard();
+            } else {
+                window.toast('Erreur lors du deplacement.', 'error');
+                this.refreshBoard();
+            }
+        } catch (err) {
+            window.toast('Erreur de connexion.', 'error');
+            this.refreshBoard();
+        }
+    },
+
+    openCreateModal() {
+        this.editingTask = null;
+        this.form = {
+            title: '', description: '', category: 'autre', priority: 'moyenne',
+            scheduled_date: this.selectedDate, scheduled_time: '', amount: '', reminder_at: '', user_id: '',
+            recurrence: '', recurrence_end_date: '',
+        };
+        this.modalOpen = true;
+    },
+
+    editTask(task) {
+        this.editingTask = task;
+        this.form = {
+            title: task.title || '',
+            description: task.description || '',
+            category: task.category || 'autre',
+            priority: task.priority || 'moyenne',
+            scheduled_date: task.scheduled_date?.substring(0, 10) || this.selectedDate,
+            scheduled_time: task.scheduled_time?.substring(0, 5) || '',
+            amount: task.amount || '',
+            reminder_at: task.reminder_at?.substring(0, 16) || '',
+            user_id: task.user_id || '',
+            recurrence: task.recurrence || '',
+            recurrence_end_date: task.recurrence_end_date?.substring(0, 10) || '',
+        };
+        this.modalOpen = true;
+    },
+
+    async submitTask() {
+        this.submitting = true;
+        const url = this.editingTask
+            ? this.routes.move + '/' + this.editingTask.id
+            : this.routes.store;
+        const method = this.editingTask ? 'PUT' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken,
+                },
+                body: JSON.stringify(this.form),
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                window.toast(this.editingTask ? 'Tache modifiee.' : 'Tache creee.', 'success', 3000);
+                this.modalOpen = false;
+                this.refreshBoard();
+            } else if (res.status === 422 && data.errors) {
+                const msgs = Object.values(data.errors).flat().join('\n');
+                window.toast(msgs, 'error');
+            } else {
+                window.toast(data.message || 'Erreur.', 'error');
+            }
+        } catch (err) {
+            window.toast('Erreur de connexion.', 'error');
+        }
+        this.submitting = false;
+    },
+
+    async deleteTask(taskId) {
+        if (!confirm('Supprimer cette tache ?')) return;
+
+        try {
+            const res = await fetch(this.routes.move + '/' + taskId, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken,
+                },
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                window.toast('Tache supprimee.', 'success', 3000);
+                this.refreshBoard();
+            }
+        } catch (err) {
+            window.toast('Erreur de connexion.', 'error');
+        }
+    },
+
+    async generateAutoTasks() {
+        this.generating = true;
+        try {
+            const res = await fetch(this.routes.generateAuto, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken,
+                },
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                window.toast(data.message || (data.count + ' tache(s) generee(s).'), 'success', 5000);
+                this.refreshBoard();
+            }
+        } catch (err) {
+            window.toast('Erreur de connexion.', 'error');
+        }
+        this.generating = false;
+    },
+
+    async refreshBoard() {
+        try {
+            const params = new URLSearchParams({
+                format: 'json',
+                date: this.selectedDate,
+                show_archived: this.showArchived ? '1' : '0',
+            });
+
+            const res = await fetch(this.routes.index + '?' + params.toString(), {
+                headers: { 'Accept': 'application/json' },
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                this.columns = data.columns;
+                this.$nextTick(() => this.initSortables());
+            }
+        } catch (err) {
+            // Silently fail
+        }
+    },
+
+    categoryLabel(cat) {
+        const labels = {
+            encaissement: 'Encaissement', relance: 'Relance', visite: 'Visite',
+            administratif: 'Administratif', document: 'Document', autre: 'Autre',
+        };
+        return labels[cat] || cat;
+    },
+
+    categoryClass(cat) {
+        const classes = {
+            encaissement: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400',
+            relance: 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400',
+            visite: 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400',
+            administratif: 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400',
+            document: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400',
+            autre: 'bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-400',
+        };
+        return classes[cat] || classes.autre;
+    },
+
+    formatAmount(amount) {
+        const num = parseFloat(amount);
+        if (isNaN(num)) return '';
+        return num.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' F';
+    },
+
+    relatedLabel(task) {
+        if (!task.related) return '';
+        const type = task.related_type?.split('\\').pop() || '';
+        if (type === 'LeaseMonthly') return 'Echeance #' + task.related_id;
+        if (type === 'Lease') return 'Bail #' + task.related_id;
+        if (type === 'Tenant') return task.related.full_name || ('Locataire #' + task.related_id);
+        if (type === 'Property') return task.related.reference || ('Bien #' + task.related_id);
+        return type + ' #' + task.related_id;
+    },
+
+    recurrenceLabel(val) {
+        const labels = {
+            quotidien: 'Quotidien', hebdomadaire: 'Hebdo', mensuel: 'Mensuel',
+            trimestriel: 'Trimestriel', annuel: 'Annuel',
+        };
+        return labels[val] || '';
+    },
+}));
+
 Alpine.start();
+
+// ─── Push Notification Subscription ────────────────────────────────────
+async function registerPushSubscription() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') return;
+
+        const registration = await navigator.serviceWorker.ready;
+        const vapidKey = document.querySelector('meta[name="vapid-public-key"]')?.content;
+        if (!vapidKey) return;
+
+        // Convert VAPID key from base64 to Uint8Array
+        const padding = '='.repeat((4 - vapidKey.length % 4) % 4);
+        const base64 = (vapidKey + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        const applicationServerKey = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; i++) {
+            applicationServerKey[i] = rawData.charCodeAt(i);
+        }
+
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey,
+        });
+
+        const key = subscription.getKey('p256dh');
+        const auth = subscription.getKey('auth');
+
+        await fetch('/push/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            },
+            body: JSON.stringify({
+                endpoint: subscription.endpoint,
+                keys: {
+                    p256dh: key ? btoa(String.fromCharCode(...new Uint8Array(key))) : '',
+                    auth: auth ? btoa(String.fromCharCode(...new Uint8Array(auth))) : '',
+                },
+            }),
+        });
+    } catch (e) {
+        // Push subscription failed silently
+    }
+}
+
+// Auto-register push on tasks page
+if (window.location.pathname === '/tasks') {
+    registerPushSubscription();
+}
+
+// Cleanup old IndexedDB entries
+window._offlineQueue.cleanup(7).catch(() => {});

@@ -22,9 +22,15 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
+     * Only runs in local/testing environments.
      */
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command->error('Seeder blocked: cannot run in production environment.');
+            return;
+        }
+
         // ─── 1. Users ───────────────────────────────────────────────────────
         $admin = User::factory()->create([
             'name' => 'Administrateur SCIManager',
@@ -88,8 +94,6 @@ class DatabaseSeeder extends Seeder
                 'surface' => 85.00,
                 'rooms' => 3,
                 'status' => 'disponible',
-                'rent_reference' => 250000,
-                'charges_reference' => 25000,
                 'nb_keys' => 3,
                 'nb_clim' => 2,
             ]),
@@ -102,8 +106,6 @@ class DatabaseSeeder extends Seeder
                 'surface' => 180.00,
                 'rooms' => 5,
                 'status' => 'disponible',
-                'rent_reference' => 450000,
-                'charges_reference' => 30000,
                 'nb_keys' => 4,
                 'nb_clim' => 3,
             ]),
@@ -116,8 +118,6 @@ class DatabaseSeeder extends Seeder
                 'surface' => 28.00,
                 'rooms' => 1,
                 'status' => 'disponible',
-                'rent_reference' => 85000,
-                'charges_reference' => 10000,
                 'nb_keys' => 2,
                 'nb_clim' => 1,
             ]),
@@ -130,8 +130,6 @@ class DatabaseSeeder extends Seeder
                 'surface' => 55.00,
                 'rooms' => 2,
                 'status' => 'disponible',
-                'rent_reference' => 350000,
-                'charges_reference' => 20000,
                 'nb_keys' => 3,
                 'nb_clim' => 2,
             ]),
@@ -148,8 +146,6 @@ class DatabaseSeeder extends Seeder
                 'surface' => 95.00,
                 'rooms' => 4,
                 'status' => 'disponible',
-                'rent_reference' => 300000,
-                'charges_reference' => 25000,
                 'nb_keys' => 3,
                 'nb_clim' => 3,
             ]),
@@ -162,8 +158,6 @@ class DatabaseSeeder extends Seeder
                 'surface' => 200.00,
                 'rooms' => 6,
                 'status' => 'disponible',
-                'rent_reference' => 500000,
-                'charges_reference' => 35000,
                 'nb_keys' => 5,
                 'nb_clim' => 4,
             ]),
@@ -176,8 +170,6 @@ class DatabaseSeeder extends Seeder
                 'surface' => 65.00,
                 'rooms' => 2,
                 'status' => 'disponible',
-                'rent_reference' => 200000,
-                'charges_reference' => 15000,
                 'nb_keys' => 2,
                 'nb_clim' => 1,
             ]),
@@ -276,7 +268,7 @@ class DatabaseSeeder extends Seeder
             'rent_amount' => $rent,
             'charges_amount' => $charges,
             'deposit_amount' => $rent * 2,
-            'payment_method' => fake()->randomElement(['especes', 'mobile_money', 'virement']),
+            'payment_method' => fake()->randomElement(['especes', 'mobile_money', 'virement', 'depot_bancaire']),
             'due_day' => 5,
             'penalty_rate' => 5,
             'penalty_delay_days' => 10,
@@ -386,7 +378,7 @@ class DatabaseSeeder extends Seeder
      */
     private function createPayments(LeaseMonthly $monthly, float $totalPaid, User $recordedBy, Carbon $monthDate): void
     {
-        $methods = ['especes', 'mobile_money', 'virement', 'cheque'];
+        $methods = ['especes', 'mobile_money', 'virement', 'cheque', 'depot_bancaire'];
         $shouldSplit = $monthly->status === 'partiel' || fake()->boolean(20);
 
         if ($shouldSplit && $totalPaid > 50000) {

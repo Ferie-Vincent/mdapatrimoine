@@ -1,9 +1,9 @@
 <section>
-    <header class="mb-5 pb-4 border-b border-gray-100">
-        <h2 class="text-base font-medium text-gray-800">
+    <header class="mb-5 pb-4 border-b border-theme-subtle">
+        <h2 class="text-base font-medium text-on-surface">
             {{ __('Profile Information') }}
         </h2>
-        <p class="mt-1 text-sm text-gray-400">
+        <p class="mt-1 text-sm text-on-surface-faint">
             {{ __("Update your account's profile information and email address.") }}
         </p>
     </header>
@@ -17,22 +17,22 @@
         @method('patch')
 
         <div>
-            <label for="name" class="mb-1.5 block text-sm font-medium text-gray-700">{{ __('Name') }}</label>
+            <label for="name" class="mb-1.5 block text-sm font-medium text-on-surface-secondary">{{ __('Name') }}</label>
             <x-text-input id="name" name="name" type="text" class="mt-1.5 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div>
-            <label for="email" class="mb-1.5 block text-sm font-medium text-gray-700">{{ __('Email') }}</label>
+            <label for="email" class="mb-1.5 block text-sm font-medium text-on-surface-secondary">{{ __('Email') }}</label>
             <x-text-input id="email" name="email" type="email" class="mt-1.5 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800">
+                    <p class="text-sm mt-2 text-on-surface">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
+                        <button form="send-verification" class="underline text-sm text-on-surface-secondary hover:text-on-surface rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500">
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
                     </p>
@@ -55,7 +55,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
+                    class="text-sm text-on-surface-secondary"
                 >{{ __('Saved.') }}</p>
             @endif
         </div>

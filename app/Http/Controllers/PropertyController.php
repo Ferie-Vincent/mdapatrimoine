@@ -169,13 +169,17 @@ class PropertyController extends Controller
         return response()->json(['success' => true, 'message' => 'Photo supprimee.']);
     }
 
-    public function destroy(Property $property): RedirectResponse
+    public function destroy(Property $property): RedirectResponse|JsonResponse
     {
         $this->authorize('delete', $property);
 
         $property->delete();
 
         AuditService::log('deleted', $property);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Bien supprime avec succes.']);
+        }
 
         return redirect()
             ->route('properties.index')

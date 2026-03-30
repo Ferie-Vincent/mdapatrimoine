@@ -29,7 +29,7 @@ class PaymentFactory extends Factory
             'sci_id' => Sci::factory(),
             'amount' => fake()->numberBetween(50, 400) * 1000,
             'paid_at' => fake()->dateTimeBetween('-3 months', 'now'),
-            'method' => fake()->randomElement(['especes', 'mobile_money', 'virement', 'cheque']),
+            'method' => fake()->randomElement(['especes', 'mobile_money', 'virement', 'cheque', 'depot_bancaire']),
             'reference' => strtoupper(fake()->bothify('PAY-####-??')),
             'note' => fake()->optional(0.3)->randomElement([
                 'Paiement reçu en main propre',

@@ -7,7 +7,7 @@
     $activeCount = collect(request()->except('page'))->filter(fn($v) => $v !== null && $v !== '')->count();
 @endphp
 
-<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+<div class="bg-surface rounded-2xl border border-theme-subtle shadow-sm overflow-hidden">
     <div class="p-5">
         {{-- Header --}}
         <div class="flex items-center gap-3 mb-4">
@@ -17,14 +17,14 @@
                 </svg>
             </div>
             <div class="flex-1 flex items-center gap-2.5">
-                <span class="text-sm font-bold text-gray-800">Filtres</span>
+                <span class="text-sm font-bold text-on-surface">Filtres</span>
                 @if($activeCount > 0)
                     <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-brand-500 text-white text-[10px] font-bold leading-none shadow-sm">{{ $activeCount }}</span>
                 @endif
             </div>
             @if($activeCount > 0)
                 <a href="{{ $action ?? request()->url() }}"
-                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-accent-red-500 hover:bg-accent-red-50 transition-colors">
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-faint hover:text-accent-red-500 hover:bg-accent-red-50 transition-colors">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                     </svg>

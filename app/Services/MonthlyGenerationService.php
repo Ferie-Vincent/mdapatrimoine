@@ -88,7 +88,41 @@ class MonthlyGenerationService
     }
 
     /**
+     * Generate a single LeaseMonthly for a meuble (furnished) lease.
+     */
+    public function generateForMeubleLease(Lease $lease): ?LeaseMonthly
+    {
+        $monthKey = Carbon::parse($lease->check_in_date)->format('Y-m');
+
+        // Skip if monthly already exists
+        $exists = LeaseMonthly::where('lease_id', $lease->id)
+            ->where('month', $monthKey)
+            ->exists();
+
+        if ($exists) {
+            return null;
+        }
+
+        $totalAmount = (float) $lease->total_amount;
+
+        return LeaseMonthly::create([
+            'lease_id'         => $lease->id,
+            'sci_id'           => $lease->sci_id,
+            'month'            => $monthKey,
+            'rent_due'         => $totalAmount,
+            'charges_due'      => 0,
+            'penalty_due'      => 0,
+            'total_due'        => $totalAmount,
+            'paid_amount'      => 0,
+            'remaining_amount' => $totalAmount,
+            'status'           => 'impaye',
+            'due_date'         => Carbon::parse($lease->check_in_date)->toDateString(),
+        ]);
+    }
+
+    /**
      * Generate monthlies for all active leases up to next month.
+     * Excludes meuble leases (they use a single monthly).
      *
      * @return int Number of monthlies generated.
      */
@@ -97,7 +131,9 @@ class MonthlyGenerationService
         $upToMonth = Carbon::now()->addMonth()->format('Y-m');
         $count = 0;
 
-        $activeLeases = Lease::where('status', 'actif')->get();
+        $activeLeases = Lease::where('status', 'actif')
+            ->where('lease_type', '!=', 'meuble')
+            ->get();
 
         foreach ($activeLeases as $lease) {
             $generated = $this->generateForLease($lease, $upToMonth);
@@ -123,6 +159,7 @@ class MonthlyGenerationService
             ->where('remaining_amount', '>', 0)
             ->where('due_date', '<', Carbon::now())
             ->where('penalty_due', '=', 0)
+            ->whereHas('lease', fn ($q) => $q->where('lease_type', '!=', 'meuble'))
             ->with('lease')
             ->get();
 

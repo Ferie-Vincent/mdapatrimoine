@@ -37,7 +37,7 @@ class LeaseFactory extends Factory
             'rent_amount' => fake()->numberBetween(80, 400) * 1000,
             'charges_amount' => fake()->randomElement([0, 10000, 15000, 20000, 25000]),
             'deposit_amount' => fake()->numberBetween(100, 400) * 1000,
-            'payment_method' => fake()->randomElement(['especes', 'mobile_money', 'virement', 'cheque']),
+            'payment_method' => fake()->randomElement(['especes', 'mobile_money', 'virement', 'cheque', 'depot_bancaire']),
             'due_day' => fake()->randomElement([1, 5, 10]),
             'penalty_rate' => fake()->randomElement([0, 2, 5, 10]),
             'penalty_delay_days' => fake()->randomElement([0, 5, 10, 15]),

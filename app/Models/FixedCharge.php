@@ -44,6 +44,7 @@ class FixedCharge extends Model
             'cie' => 'CIE',
             'sodeci' => 'SODECI',
             'honoraire' => 'Honoraire',
+            'autre' => 'Autres',
             default => $this->charge_type,
         });
     }

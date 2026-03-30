@@ -2,133 +2,122 @@
 
 @section('title', 'Bien ' . $property->reference)
 
-@section('actions')
-    <div class="flex items-center gap-1.5">
-        <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition shadow-sm print:hidden">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            Imprimer
-        </button>
-        @can('update', $property)
-            <button @click="$dispatch('open-modal', 'edit-property-{{ $property->id }}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 rounded-lg text-xs font-semibold text-white hover:bg-amber-700 transition shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                Modifier
-            </button>
-        @endcan
-        @can('delete', $property)
-            <form method="POST" action="{{ route('properties.destroy', $property) }}" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce bien ?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-red-400 rounded-lg text-xs font-semibold text-white hover:bg-accent-red-500 transition shadow-sm">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    Supprimer
-                </button>
-            </form>
-        @endcan
-    </div>
-@endsection
-
 @section('content')
-    {{-- Detail Card --}}
-    <div class="bg-white rounded-2xl border border-gray-100 mb-6 overflow-hidden">
-        {{-- Header --}}
-        <div class="px-6 py-5 bg-gradient-to-r from-slate-800 to-slate-700 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-white">{{ $property->reference }}</h3>
-                    <p class="text-sm text-slate-300">{{ ucfirst($property->type) }} &mdash; {{ $property->sci->name }}</p>
-                </div>
+    @php
+        $statusLabels = ['disponible' => 'Disponible', 'occupe' => 'Occupé', 'travaux' => 'En travaux'];
+        $dotColors = ['disponible' => 'bg-emerald-400', 'occupe' => 'bg-blue-400', 'travaux' => 'bg-amber-400'];
+    @endphp
+
+    {{-- Hero Header --}}
+    <div class="relative bg-gradient-to-br from-brand-700 via-brand-500 to-indigo-500 dark:from-brand-900 dark:via-brand-700 dark:to-indigo-800 rounded-2xl overflow-hidden mb-6 print:hidden">
+        <div class="absolute inset-0 opacity-[0.07]" style="background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px); background-size: 44px 44px;"></div>
+
+        {{-- Top bar --}}
+        <div class="relative flex items-center justify-between px-5 pt-5">
+            <a href="{{ route('properties.index') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg text-sm font-medium text-white transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Retour
+            </a>
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg text-sm font-medium text-white transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                </button>
+                @can('update', $property)
+                    <button @click="$dispatch('open-modal', 'edit-property-{{ $property->id }}')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg text-sm font-medium text-white transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        Modifier
+                    </button>
+                @endcan
+                @can('delete', $property)
+                    <form method="POST" action="{{ route('properties.destroy', $property) }}" class="inline" onsubmit="return confirm('Supprimer ce bien ?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="inline-flex items-center p-2 bg-white/10 hover:bg-red-500/80 backdrop-blur-sm rounded-lg text-white transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </form>
+                @endcan
             </div>
-            @php
-                $statusColors = [
-                    'disponible' => 'bg-emerald-400/20 text-emerald-300 ring-emerald-400/30',
-                    'occupe' => 'bg-blue-400/20 text-blue-300 ring-blue-400/30',
-                    'travaux' => 'bg-amber-400/20 text-amber-300 ring-amber-400/30',
-                ];
-                $statusLabels = ['disponible' => 'Disponible', 'occupe' => 'Occupé', 'travaux' => 'En travaux'];
-                $dotColors = ['disponible' => 'bg-emerald-400', 'occupe' => 'bg-blue-400', 'travaux' => 'bg-amber-400'];
-            @endphp
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ring-1 {{ $statusColors[$property->status] ?? 'bg-gray-400/20 text-gray-300 ring-gray-400/30' }}">
+        </div>
+
+        {{-- Centered content --}}
+        <div class="relative text-center px-6 pb-8 pt-6">
+            <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-sm text-white border border-white/20">
                 <span class="w-1.5 h-1.5 rounded-full mr-1.5 {{ $dotColors[$property->status] ?? 'bg-gray-400' }}"></span>
                 {{ $statusLabels[$property->status] ?? ucfirst($property->status) }}
             </span>
+            <h1 class="text-2xl md:text-3xl font-bold text-white mt-3">{{ $property->reference }}</h1>
+            <p class="text-white/70 mt-2">{{ ucfirst($property->type) }} &mdash; {{ $property->sci->name }}</p>
+            @if($property->address)
+                <div class="mt-3 flex items-center justify-center gap-1.5 text-sm text-white/60">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    {{ $property->address }}{{ $property->city ? ', ' . $property->city : '' }}
+                </div>
+            @endif
         </div>
+    </div>
 
-        {{-- Location --}}
-        <div class="px-6 py-5 border-b border-gray-100 bg-slate-50/50">
-            <div class="flex items-start gap-3">
-                <div class="w-9 h-9 rounded-lg bg-brand-100 flex items-center justify-center shrink-0 mt-0.5">
-                    <svg class="w-4.5 h-4.5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Adresse</p>
-                    <p class="text-sm font-semibold text-gray-900">{{ $property->address ?? '-' }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ $property->city ?? '' }}</p>
-                </div>
-            </div>
-        </div>
+    {{-- Detail Card --}}
+    <div class="bg-surface rounded-2xl border border-theme-subtle mb-6 overflow-hidden">
 
         {{-- Caractéristiques --}}
-        <div class="px-6 py-5 border-b border-gray-100">
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Caractéristiques</p>
+        <div class="px-6 py-5 border-b border-theme-subtle">
+            <p class="text-xs font-semibold text-on-surface-faint uppercase tracking-wider mb-4">Caractéristiques</p>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div class="bg-slate-50 rounded-xl p-3 text-center">
-                    <p class="text-xs text-gray-400">Surface</p>
-                    <p class="text-sm font-bold text-gray-900 mt-0.5">{{ $property->surface ? $property->surface . ' m²' : '-' }}</p>
+                <div class="bg-surface-hover rounded-xl p-3 text-center">
+                    <p class="text-xs text-on-surface-faint">Surface</p>
+                    <p class="text-sm font-bold text-on-surface mt-0.5">{{ $property->surface ? $property->surface . ' m²' : '-' }}</p>
                 </div>
-                <div class="bg-slate-50 rounded-xl p-3 text-center">
-                    <p class="text-xs text-gray-400">Pièces</p>
-                    <p class="text-sm font-bold text-gray-900 mt-0.5">{{ $property->rooms ?? '-' }}</p>
+                <div class="bg-surface-hover rounded-xl p-3 text-center">
+                    <p class="text-xs text-on-surface-faint">Pièces</p>
+                    <p class="text-sm font-bold text-on-surface mt-0.5">{{ $property->rooms ?? '-' }}</p>
                 </div>
                 @if($property->niveau)
-                <div class="bg-slate-50 rounded-xl p-3 text-center">
-                    <p class="text-xs text-gray-400">Niveau</p>
-                    <p class="text-sm font-bold text-gray-900 mt-0.5">{{ $property->niveau }}</p>
+                <div class="bg-surface-hover rounded-xl p-3 text-center">
+                    <p class="text-xs text-on-surface-faint">Niveau</p>
+                    <p class="text-sm font-bold text-on-surface mt-0.5">{{ $property->niveau }}</p>
                 </div>
                 @endif
                 @if($property->numero_porte)
-                <div class="bg-slate-50 rounded-xl p-3 text-center">
-                    <p class="text-xs text-gray-400">N° Appartement</p>
-                    <p class="text-sm font-bold text-gray-900 mt-0.5">{{ $property->numero_porte }}</p>
+                <div class="bg-surface-hover rounded-xl p-3 text-center">
+                    <p class="text-xs text-on-surface-faint">N° Appartement</p>
+                    <p class="text-sm font-bold text-on-surface mt-0.5">{{ $property->numero_porte }}</p>
                 </div>
                 @endif
-                <div class="bg-slate-50 rounded-xl p-3 text-center">
-                    <p class="text-xs text-gray-400">Clés</p>
-                    <p class="text-sm font-bold text-gray-900 mt-0.5">{{ $property->nb_keys ?? '-' }}</p>
+                <div class="bg-surface-hover rounded-xl p-3 text-center">
+                    <p class="text-xs text-on-surface-faint">Clés</p>
+                    <p class="text-sm font-bold text-on-surface mt-0.5">{{ $property->nb_keys ?? '-' }}</p>
                 </div>
-                <div class="bg-slate-50 rounded-xl p-3 text-center">
-                    <p class="text-xs text-gray-400">Climatiseurs</p>
-                    <p class="text-sm font-bold text-gray-900 mt-0.5">{{ $property->nb_clim ?? '-' }}</p>
+                <div class="bg-surface-hover rounded-xl p-3 text-center">
+                    <p class="text-xs text-on-surface-faint">Climatiseurs</p>
+                    <p class="text-sm font-bold text-on-surface mt-0.5">{{ $property->nb_clim ?? '-' }}</p>
                 </div>
             </div>
         </div>
 
         {{-- Compteurs --}}
         @if($property->cie_meter_number || $property->sodeci_meter_number)
-        <div class="px-6 py-5 border-b border-gray-100">
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Compteurs</p>
+        <div class="px-6 py-5 border-b border-theme-subtle">
+            <p class="text-xs font-semibold text-on-surface-faint uppercase tracking-wider mb-4">Compteurs</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @if($property->cie_meter_number)
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                    <div class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400">Compteur CIE</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ $property->cie_meter_number }}</p>
+                        <p class="text-xs text-on-surface-faint">Compteur CIE</p>
+                        <p class="text-sm font-semibold text-on-surface">{{ $property->cie_meter_number }}</p>
                     </div>
                 </div>
                 @endif
                 @if($property->sodeci_meter_number)
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                    <div class="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400">Compteur SODECI</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ $property->sodeci_meter_number }}</p>
+                        <p class="text-xs text-on-surface-faint">Compteur SODECI</p>
+                        <p class="text-sm font-semibold text-on-surface">{{ $property->sodeci_meter_number }}</p>
                     </div>
                 </div>
                 @endif
@@ -138,19 +127,19 @@
 
         {{-- Description --}}
         @if($property->description)
-        <div class="px-6 py-4 bg-slate-50/30">
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Description</p>
-            <p class="text-sm text-gray-700">{{ $property->description }}</p>
+        <div class="px-6 py-4 bg-surface-hover/30">
+            <p class="text-xs font-semibold text-on-surface-faint uppercase tracking-wider mb-2">Description</p>
+            <p class="text-sm text-on-surface-secondary">{{ $property->description }}</p>
         </div>
         @endif
     </div>
 
     {{-- Map --}}
     @if($property->latitude && $property->longitude)
-        <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Localisation</h3>
-            <div id="show-map" style="height: 300px; position: relative; z-index: 0;" class="rounded-lg border border-gray-200 overflow-hidden"></div>
-            <p class="mt-2 text-xs text-gray-500">Coordonnées : {{ number_format($property->latitude, 7) }}, {{ number_format($property->longitude, 7) }}</p>
+        <div class="bg-surface rounded-2xl border border-theme-subtle p-6 mb-6">
+            <h3 class="text-lg font-semibold text-on-surface mb-4">Localisation</h3>
+            <div id="show-map" style="height: 300px; position: relative; z-index: 0;" class="rounded-lg border border-theme overflow-hidden"></div>
+            <p class="mt-2 text-xs text-on-surface-muted">Coordonnées : {{ number_format($property->latitude, 7) }}, {{ number_format($property->longitude, 7) }}</p>
         </div>
         @push('styles')
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -171,12 +160,12 @@
 
     {{-- Photo Gallery --}}
     @if(!empty($property->photos))
-        <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-6" x-data="photoGallery()" x-cloak>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Photos ({{ count($property->photos) }})</h3>
+        <div class="bg-surface rounded-2xl border border-theme-subtle p-6 mb-6" x-data="photoGallery()" x-cloak>
+            <h3 class="text-lg font-semibold text-on-surface mb-4">Photos ({{ count($property->photos) }})</h3>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 @foreach($property->photos as $index => $photo)
-                    <div class="relative group rounded-lg overflow-hidden border border-gray-200 cursor-pointer"
+                    <div class="relative group rounded-lg overflow-hidden border border-theme cursor-pointer"
                          @click="openLightbox({{ $index }})">
                         <img src="{{ asset('storage/' . $photo) }}" alt="Photo {{ $index + 1 }}"
                              class="w-full h-32 object-cover transition group-hover:scale-105">
@@ -198,14 +187,14 @@
 
             {{-- Lightbox Modal --}}
             <div x-show="lightboxOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" @keydown.escape.window="closeLightbox()" @click.self="closeLightbox()">
-                <button @click="closeLightbox()" class="absolute top-4 right-4 text-white hover:text-gray-300 transition">
+                <button @click="closeLightbox()" class="absolute top-4 right-4 text-white hover:text-on-surface-faint transition">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
-                <button x-show="photos.length > 1" @click="prev()" class="absolute left-4 text-white hover:text-gray-300 transition">
+                <button x-show="photos.length > 1" @click="prev()" class="absolute left-4 text-white hover:text-on-surface-faint transition">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </button>
                 <img :src="currentPhoto" class="max-h-[85vh] max-w-[90vw] rounded-lg shadow-2xl" alt="">
-                <button x-show="photos.length > 1" @click="next()" class="absolute right-4 text-white hover:text-gray-300 transition">
+                <button x-show="photos.length > 1" @click="next()" class="absolute right-4 text-white hover:text-on-surface-faint transition">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </div>
@@ -244,37 +233,37 @@
 
     {{-- Current Lease --}}
     @if($property->activeLease)
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-6">
-            <div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+        <div class="bg-surface rounded-2xl border border-theme-subtle overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-theme-subtle flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900">Bail actif</h3>
+                <h3 class="text-lg font-semibold text-on-surface">Bail actif</h3>
             </div>
             <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="flex items-start gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-violet-100 flex items-center justify-center shrink-0 mt-0.5">
+                        <div class="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center shrink-0 mt-0.5">
                             <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         </div>
                         <div>
-                            <p class="text-xs text-gray-400">Locataire</p>
-                            <a href="{{ route('tenants.show', $property->activeLease->tenant) }}" class="text-sm font-semibold text-brand-600 hover:text-brand-800 transition">
+                            <p class="text-xs text-on-surface-faint">Locataire</p>
+                            <a href="{{ route('tenants.show', $property->activeLease->tenant) }}" class="text-sm font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-800 dark:hover:text-brand-300 transition">
                                 {{ $property->activeLease->tenant->full_name }}
                             </a>
                         </div>
                     </div>
-                    <div class="bg-brand-50/60 rounded-xl p-3 border border-brand-100">
+                    <div class="bg-brand-50/60 dark:bg-brand-950/30 rounded-xl p-3 border border-brand-100 dark:border-gray-600">
                         <p class="text-xs text-brand-500">Loyer mensuel</p>
-                        <p class="text-lg font-bold text-gray-900">{{ number_format($property->activeLease->rent_amount, 0, ',', ' ') }} <span class="text-xs font-medium text-gray-500">FCFA</span></p>
+                        <p class="text-lg font-bold text-on-surface">{{ number_format($property->activeLease->rent_amount, 0, ',', ' ') }} <span class="text-xs font-medium text-on-surface-muted">FCFA</span></p>
                     </div>
-                    <div class="pl-4 border-l-2 border-brand-200">
-                        <p class="text-xs text-gray-400">Début</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ $property->activeLease->start_date->format('d/m/Y') }}</p>
+                    <div class="pl-4 border-l-2 border-brand-200 dark:border-gray-600">
+                        <p class="text-xs text-on-surface-faint">Début</p>
+                        <p class="text-sm font-semibold text-on-surface">{{ $property->activeLease->start_date->format('d/m/Y') }}</p>
                     </div>
-                    <div class="pl-4 border-l-2 border-orange-200">
-                        <p class="text-xs text-gray-400">Fin</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ $property->activeLease->end_date->format('d/m/Y') }}</p>
+                    <div class="pl-4 border-l-2 border-orange-200 dark:border-orange-800/30">
+                        <p class="text-xs text-on-surface-faint">Fin</p>
+                        <p class="text-sm font-semibold text-on-surface">{{ $property->activeLease->end_date->format('d/m/Y') }}</p>
                     </div>
                 </div>
             </div>
@@ -282,29 +271,29 @@
     @endif
 
     {{-- Lease History --}}
-    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100">
-            <h3 class="text-lg font-semibold text-gray-900">Historique des baux</h3>
+    <div class="bg-surface rounded-2xl border border-theme-subtle overflow-hidden">
+        <div class="px-6 py-4 border-b border-theme-subtle">
+            <h3 class="text-lg font-semibold text-on-surface">Historique des baux</h3>
         </div>
 
         @if($property->leases->count())
-            <table class="min-w-full divide-y divide-gray-100">
+            <table class="min-w-full divide-y divide-theme-subtle">
                 <thead class="">
                     <tr>
-                        <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Locataire</th>
-                        <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Loyer</th>
-                        <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Début</th>
-                        <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Fin</th>
-                        <th class="px-6 py-3.5 text-left text-sm font-medium text-gray-400">Statut</th>
+                        <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Locataire</th>
+                        <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Loyer</th>
+                        <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Début</th>
+                        <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Fin</th>
+                        <th class="px-6 py-3.5 text-left text-sm font-medium text-on-surface-faint">Statut</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-theme-subtle">
                     @foreach($property->leases as $lease)
-                        <tr class="hover:bg-gray-50/50 transition">
-                            <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $lease->tenant->full_name ?? '-' }}</td>
-                            <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ number_format($lease->rent_amount, 0, ',', ' ') }} FCFA</td>
-                            <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $lease->start_date->format('d/m/Y') }}</td>
-                            <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-600">{{ $lease->end_date->format('d/m/Y') }}</td>
+                        <tr class="hover:bg-surface-hover/50 transition">
+                            <td class="px-6 py-5 whitespace-nowrap text-sm text-on-surface-secondary">{{ $lease->tenant->full_name ?? '-' }}</td>
+                            <td class="px-6 py-5 whitespace-nowrap text-sm text-on-surface-secondary">{{ number_format($lease->rent_amount, 0, ',', ' ') }} FCFA</td>
+                            <td class="px-6 py-5 whitespace-nowrap text-sm text-on-surface-secondary">{{ $lease->start_date->format('d/m/Y') }}</td>
+                            <td class="px-6 py-5 whitespace-nowrap text-sm text-on-surface-secondary">{{ $lease->end_date->format('d/m/Y') }}</td>
                             <td class="px-6 py-5 whitespace-nowrap">
                                 @if($lease->status === 'actif')
                                     <x-badge type="success">Actif</x-badge>

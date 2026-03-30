@@ -7,8 +7,10 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Add 'a_venir' to the enum
-        DB::statement("ALTER TABLE lease_monthlies MODIFY COLUMN status ENUM('paye', 'partiel', 'impaye', 'en_retard', 'a_venir') DEFAULT 'impaye'");
+        // Add 'a_venir' to the enum (MySQL only — SQLite stores enums as TEXT)
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE lease_monthlies MODIFY COLUMN status ENUM('paye', 'partiel', 'impaye', 'en_retard', 'a_venir') DEFAULT 'impaye'");
+        }
 
         // Fix existing data: future unpaid monthlies should be 'a_venir'
         DB::table('lease_monthlies')
@@ -25,6 +27,8 @@ return new class extends Migration
             ->where('status', 'a_venir')
             ->update(['status' => 'impaye']);
 
-        DB::statement("ALTER TABLE lease_monthlies MODIFY COLUMN status ENUM('paye', 'partiel', 'impaye', 'en_retard') DEFAULT 'impaye'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE lease_monthlies MODIFY COLUMN status ENUM('paye', 'partiel', 'impaye', 'en_retard') DEFAULT 'impaye'");
+        }
     }
 };

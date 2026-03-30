@@ -99,7 +99,11 @@ class LeaseController extends Controller
                 $updates['signed_lease_path'] = $request->file('signed_lease')->store('leases/signed', 'public');
             }
             if ($request->hasFile('entry_inspection')) {
-                $updates['entry_inspection_path'] = $request->file('entry_inspection')->store('leases/inspections', 'public');
+                $paths = [];
+                foreach ($request->file('entry_inspection') as $file) {
+                    $paths[] = $file->store('leases/inspections', 'public');
+                }
+                $updates['entry_inspection_path'] = $paths;
             }
             if (!empty($updates)) {
                 $lease->update($updates);
@@ -175,7 +179,19 @@ class LeaseController extends Controller
         }
 
         if ($request->hasFile('entry_inspection')) {
-            $data['entry_inspection_path'] = $request->file('entry_inspection')->store('leases/inspections', 'public');
+            $existing = $lease->entry_inspection_path ?? [];
+            // Remove files the user deleted
+            $removed = $request->input('remove_inspection_files', []);
+            $existing = array_values(array_filter($existing, fn($p) => !in_array($p, $removed)));
+            // Add new files
+            foreach ($request->file('entry_inspection') as $file) {
+                $existing[] = $file->store('leases/inspections', 'public');
+            }
+            $data['entry_inspection_path'] = $existing;
+        } elseif ($request->has('remove_inspection_files')) {
+            $existing = $lease->entry_inspection_path ?? [];
+            $removed = $request->input('remove_inspection_files', []);
+            $data['entry_inspection_path'] = array_values(array_filter($existing, fn($p) => !in_array($p, $removed)));
         }
 
         $oldRent = (float) $lease->rent_amount;
@@ -225,13 +241,17 @@ class LeaseController extends Controller
             ->with('success', 'Bail mis a jour avec succes.');
     }
 
-    public function destroy(Lease $lease): RedirectResponse
+    public function destroy(Lease $lease): RedirectResponse|JsonResponse
     {
         $this->authorize('delete', $lease);
 
         $lease->delete();
 
         AuditService::log('deleted', $lease);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Bail supprime avec succes.']);
+        }
 
         return redirect()
             ->route('leases.index')

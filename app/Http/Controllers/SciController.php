@@ -111,13 +111,17 @@ class SciController extends Controller
             ->with('success', 'SCI mise a jour avec succes.');
     }
 
-    public function destroy(Sci $sci): RedirectResponse
+    public function destroy(Sci $sci): RedirectResponse|JsonResponse
     {
         $this->authorize('delete', $sci);
 
         $sci->delete();
 
         AuditService::log('deleted', $sci);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'SCI supprimee avec succes.']);
+        }
 
         return redirect()
             ->route('scis.index')

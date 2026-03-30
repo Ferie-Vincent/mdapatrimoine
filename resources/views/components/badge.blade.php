@@ -5,18 +5,18 @@
 
 @php
 $classes = match($type) {
-    'paye', 'success'       => 'bg-green-50 text-green-600 ring-green-500/20',
-    'partiel', 'warning'    => 'bg-yellow-50 text-yellow-600 ring-yellow-500/20',
-    'impaye', 'danger'      => 'bg-red-50 text-red-600 ring-red-500/20',
-    'en_retard'             => 'bg-red-50 text-red-700 ring-red-500/20 font-semibold',
-    'a_venir'               => 'bg-blue-50 text-blue-600 ring-blue-500/20',
-    'actif'                 => 'bg-green-50 text-green-600 ring-green-500/20',
-    'resilie'               => 'bg-gray-50 text-gray-600 ring-gray-500/20',
-    'en_attente', 'default' => 'bg-blue-50 text-blue-600 ring-blue-500/20',
-    'disponible'            => 'bg-green-50 text-green-600 ring-green-500/20',
-    'occupe'                => 'bg-blue-50 text-blue-600 ring-blue-500/20',
-    'travaux'               => 'bg-orange-50 text-orange-600 ring-orange-500/20',
-    default                 => 'bg-gray-50 text-gray-600 ring-gray-500/20',
+    'paye', 'success'       => 'bg-green-50 dark:bg-green-950/30 text-green-600 ring-green-500/20',
+    'partiel', 'warning'    => 'bg-yellow-50 dark:bg-yellow-950/30 text-yellow-600 ring-yellow-500/20',
+    'impaye', 'danger'      => 'bg-red-50 dark:bg-red-950/30 text-red-600 ring-red-500/20',
+    'en_retard'             => 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 ring-red-500/20 font-semibold',
+    'a_venir'               => 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 ring-blue-500/20',
+    'actif'                 => 'bg-green-50 dark:bg-green-950/30 text-green-600 ring-green-500/20',
+    'resilie'               => 'bg-surface-hover text-on-surface-secondary ring-gray-500/20',
+    'en_attente', 'default' => 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 ring-blue-500/20',
+    'disponible'            => 'bg-green-50 dark:bg-green-950/30 text-green-600 ring-green-500/20',
+    'occupe'                => 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 ring-blue-500/20',
+    'travaux'               => 'bg-orange-50 dark:bg-orange-950/30 text-orange-600 ring-orange-500/20',
+    default                 => 'bg-surface-hover text-on-surface-secondary ring-gray-500/20',
 };
 @endphp
 

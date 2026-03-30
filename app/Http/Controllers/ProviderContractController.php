@@ -8,6 +8,7 @@ use App\Http\Requests\StoreProviderContractRequest;
 use App\Http\Requests\UpdateProviderContractRequest;
 use App\Models\ProviderContract;
 use App\Services\AuditService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 
 class ProviderContractController extends Controller
@@ -38,13 +39,17 @@ class ProviderContractController extends Controller
             ->with('success', 'Contrat mis a jour avec succes.');
     }
 
-    public function destroy(ProviderContract $contract): RedirectResponse
+    public function destroy(ProviderContract $contract): RedirectResponse|JsonResponse
     {
         abort_unless(auth()->user()->isSuperAdmin() || auth()->user()->isGestionnaire(), 403);
 
         $contract->delete();
 
         AuditService::log('deleted', $contract);
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Contrat supprime avec succes.']);
+        }
 
         return redirect()
             ->route('service-providers.index')

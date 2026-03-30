@@ -1,8 +1,10 @@
 <?php
 
+use App\Jobs\GenerateAutoTasksJob;
 use App\Jobs\GenerateMonthliesJob;
 use App\Jobs\GenerateMonthlySciReportJob;
 use App\Jobs\SendRemindersJob;
+use App\Jobs\SendTaskRemindersJob;
 use App\Models\Sci;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Carbon;
@@ -47,6 +49,12 @@ Schedule::call(function () {
         Log::info("Transitioned {$updated} lease monthlies from 'a_venir' to 'impaye'.");
     }
 })->dailyAt('00:00');
+
+// Generate auto tasks + archive old ones daily at 06:30
+Schedule::job(new GenerateAutoTasksJob())->dailyAt('06:30');
+
+// Send task reminders every 5 minutes
+Schedule::job(new SendTaskRemindersJob())->everyFiveMinutes();
 
 // Update overdue status daily at 00:30
 Schedule::call(function () {

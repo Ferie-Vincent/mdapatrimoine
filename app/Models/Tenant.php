@@ -90,4 +90,11 @@ class Tenant extends Model
 
         return $query->whereIn('sci_id', $user->accessibleSciIds());
     }
+
+    public function scopeIdExpiring(Builder $query, int $days = 30): Builder
+    {
+        return $query->where('is_active', true)
+            ->whereNotNull('id_expiration')
+            ->where('id_expiration', '<=', \Carbon\Carbon::now()->addDays($days));
+    }
 }

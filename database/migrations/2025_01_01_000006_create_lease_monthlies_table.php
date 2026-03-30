@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('total_due', 12, 2);
             $table->decimal('paid_amount', 12, 2)->default(0);
             $table->decimal('remaining_amount', 12, 2);
-            $table->enum('status', ['paye', 'partiel', 'impaye', 'en_retard'])->default('impaye');
+            $table->enum('status', ['paye', 'partiel', 'impaye', 'en_retard', 'a_venir'])->default('impaye');
             $table->date('due_date');
             $table->timestamps();
 

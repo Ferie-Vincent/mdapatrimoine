@@ -34,6 +34,27 @@ self.addEventListener('message', (event) => {
     }
 });
 
+// Push notification handler
+self.addEventListener('push', (event) => {
+    const data = event.data ? event.data.json() : {};
+    const title = data.title || 'SCIManager';
+    const options = {
+        body: data.body || '',
+        icon: data.icon || '/assets/img/pwa-192.png',
+        badge: '/assets/img/pwa-192.png',
+        data: data.data || {},
+        actions: data.actions || [],
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Notification click handler
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const url = event.notification.data?.url || '/tasks';
+    event.waitUntil(clients.openWindow(url));
+});
+
 // Fetch handler
 self.addEventListener('fetch', (event) => {
     const { request } = event;
